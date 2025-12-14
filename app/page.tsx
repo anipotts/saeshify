@@ -55,12 +55,12 @@ export default function Home() {
         {!loading && !results && !query && (
           <div className="flex flex-col items-center justify-center h-full py-20 opacity-50 space-y-2">
              <Search size={48} strokeWidth={1} />
-             <p className="text-sm font-medium">Start typing to search...</p>
+             <p className="text-sm font-medium">Search a song or album to start.</p>
           </div>
         )}
 
         {!loading && results && (
-          <AnimatePresence>
+          <div className="space-y-8">
             {/* Tracks */}
             {results.tracks?.items?.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
@@ -106,7 +106,7 @@ export default function Home() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </div>
         )}
       </div>
     </div>

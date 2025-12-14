@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google"; // Point 7: Use Inter
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import PwaInstallBanner from "@/components/PwaInstallBanner";
 
 // Point 7: Inter font stack
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -45,6 +46,7 @@ export default function RootLayout({
         </main>
         
         {/* Point 8: Bottom Nav (fixed) */}
+        <PwaInstallBanner />
         <BottomNav />
       </body>
     </html>
