@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #FFFFFF;
+  
+  /* Spotify Palette */
+  --spotify-green: #1DB954;
+  --spotify-black: #191414;
+  --spotify-white: #FFFFFF;
+  --spotify-gray-dark: #212121;
+  --spotify-gray: #535353;
+  --spotify-gray-light: #B3B3B3;
+
+  /* Safe Area Variables */
+  --sat: env(safe-area-inset-top);
+  --sar: env(safe-area-inset-right);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+}
+
+/* Specific Safe Area Utilities if needed, mostly used in padding */
+.pb-safe {
+  padding-bottom: var(--sab);
+}
+.pt-safe {
+  padding-top: var(--sat);
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background); /* Fallback */
+  overscroll-behavior-y: none;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
