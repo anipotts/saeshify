@@ -1,31 +1,35 @@
 "use client";
 
 import Image from "next/image";
+import { Search } from "lucide-react";
+import Link from "next/link";
 
-// Mock Data
-const MOCK_BANK = Array.from({ length: 12 }).map((_, i) => ({
-  id: `b-${i}`,
-  name: `Favorite Song ${i + 1}`,
-  artist: `Artist ${i + 1}`,
-  image: `https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b`,
-}));
-
+// Real implementation would fetch from Supabase
 export default function BankPage() {
+  const bank = []; // Empty for now to verify onboarding/empty state
+
   return (
-    <div className="py-6 sm:py-8 space-y-4 sm:space-y-6">
+    <div className="py-6 sm:py-8 space-y-4 sm:space-y-6 px-4">
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6">My Bank</h1>
       
-      <div className="grid grid-cols-2 gap-4">
-        {MOCK_BANK.map((item) => (
-          <div key={item.id} className="bg-[#121212] p-3 rounded-md active:scale-95 transition-transform">
-             <div className="relative aspect-square w-full mb-3 shadow-md">
-                <Image src={item.image} alt={item.name} fill className="object-cover rounded-md" />
-             </div>
-             <p className="font-bold text-sm truncate text-white">{item.name}</p>
-             <p className="text-xs text-[#B3B3B3] truncate">{item.artist}</p>
-          </div>
-        ))}
-      </div>
+      {bank.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 opacity-50 space-y-4 text-center">
+           <div className="bg-white/10 p-4 rounded-full">
+             <Search size={32} />
+           </div>
+           <div className="space-y-1">
+             <p className="text-lg font-bold">Your bank is empty</p>
+             <p className="text-sm text-neutral-400">Go search and add songs to start ranking.</p>
+           </div>
+           <Link href="/" className="mt-4 bg-white text-black font-bold py-2 px-6 rounded-full text-sm hover:scale-105 transition-transform">
+             Find Songs
+           </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          {/* Real mapping would go here */}
+        </div>
+      )}
     </div>
   );
 }
