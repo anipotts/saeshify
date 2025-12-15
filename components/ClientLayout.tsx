@@ -98,7 +98,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                <div className="md:hidden absolute top-4 left-4 z-50">
                   <div 
                     onClick={() => setMobileSettingsOpen(true)}
-                    className="w-8 h-8 rounded-full bg-orange-500 overflow-hidden relative border border-white/10 shadow-lg"
+                    className="w-12 h-12 rounded-full overflow-hidden relative border border-white/10 shadow-lg"
                   >
                      <Image src="/favicon.ico" alt="Me" fill className="object-cover" /> 
                      {/* Placeholder logic: prompt said Saesha avatar placeholder. 

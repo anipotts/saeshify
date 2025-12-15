@@ -2,7 +2,17 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { getNextMatchup, MatchupPair } from "@/lib/ranking/matchmaking";
+import { getNextMatchup } from "@/lib/ranking/matchmaking";
+
+// --- AUTH HOOK ---
+import { RankedTrack } from "@/lib/ranking/types";
+
+// ... (previous imports)
+
+// ... (useAuthUser and useVaultTracks omitted for brevity if unchanged, but I need to be careful with replace)
+// Actually I should view the file content positions again or use safe replacements.
+// I will replace the whole file content to be safe and clean or just the specialized hook.
+// I'll replace the whole file as it is small.
 
 // --- AUTH HOOK ---
 export function useAuthUser() {
@@ -22,7 +32,7 @@ export function useAuthUser() {
 
 // --- VAULT HOOK ---
 export function useVaultTracks() {
-  const [tracks, setTracks] = useState<any[]>([]);
+  const [tracks, setTracks] = useState<RankedTrack[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +44,7 @@ export function useVaultTracks() {
          .select("*")
          .order("liked_at", { ascending: false });
        
-       if (!error && data) setTracks(data);
+       if (!error && data) setTracks(data as any as RankedTrack[]);
        setLoading(false);
     };
     fetchVault();
@@ -46,7 +56,7 @@ export function useVaultTracks() {
 
 // --- RANKINGS HOOK ---
 export function useRankings() {
-   const [tracks, setTracks] = useState<any[]>([]);
+   const [tracks, setTracks] = useState<RankedTrack[]>([]);
    const [loading, setLoading] = useState(true);
 
    useEffect(() => {
@@ -57,7 +67,7 @@ export function useRankings() {
           .select("*")
           .order("rating", { ascending: false }); // Elo Sort
         
-        if (!error && data) setTracks(data);
+        if (!error && data) setTracks(data as any as RankedTrack[]);
         setLoading(false);
      };
      fetchRankings();
