@@ -78,7 +78,7 @@ export default function ArtistPage() {
   const { artist, top_tracks, albums } = data;
 
   return (
-    <div className="bg-[#121212] min-h-screen pb-24 text-white">
+    <div className="bg-[#121212] min-h-full pb-24 text-white relative">
       
       {/* 1. Header with Artist Image background */}
       <div className="relative w-full h-[40vh] md:h-[50vh]">

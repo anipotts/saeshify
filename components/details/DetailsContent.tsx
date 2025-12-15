@@ -7,9 +7,20 @@ import { useUIStore } from "@/lib/store";
 import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
 
 export default function DetailsContent() {
-  const { focusedEntity, closeDetails } = useUIStore();
+  const { focusedEntity, closeDetails, isDetailsOpen } = useUIStore();
   const pathname = usePathname();
   const router = useRouter();
+
+  // Helper to close only on mobile
+  const handleNavigationFromDetails = (path: string) => {
+     if (window.innerWidth < 768) {
+         closeDetails(); // Close both on mobile
+     }
+     // On desktop, we ideally want to keep the right panel open IF the user wants, 
+     // but the prompt says "don't automatically close... for mobile automatically close".
+     // So we just navigate.
+     router.push(path);
+  };
 
   if (!focusedEntity) return null;
 
@@ -97,7 +108,10 @@ export default function DetailsContent() {
           {!isVault && !isRankings && (
             <>
               <button 
-                onClick={type === 'track' ? handleAddToVault : undefined}
+                onClick={type === 'track' ? handleAddToVault : () => {
+                    if (type === 'artist') handleNavigationFromDetails(`/artist/${data.id}`);
+                    if (type === 'album') handleNavigationFromDetails(`/album/${data.id}`);
+                }}
                 className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
               >
                 {type === "track" ? (
