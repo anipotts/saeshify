@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { isStandalone, hasOnboarded, hasDismissedInstallTip, setDismissedInstallTip } from "@/lib/pwa";
+import { isStandalone, hasOnboarded, hasDismissedInstallTip, setDismissedInstallTip } from "@/lib/utils/pwa";
 import { X, ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import OnboardingFlow from "./onboarding/OnboardingFlow";
+import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 
 // Reusing logic: if they click the banner, we show the instructions part of the OnboardingFlow?
 // Or we can just create a simple "Instructions Modal" here. 

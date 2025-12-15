@@ -7,7 +7,7 @@ import { Search, MoreHorizontal, Trophy, Trash2, Play } from "lucide-react";
 import { useVaultTracks } from "@/lib/hooks/useData";
 import { useUIStore } from "@/lib/store";
 import { removeTrackFromVault } from "@/lib/actions/vault";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/ui/PageHeader";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 

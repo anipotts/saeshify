@@ -3,8 +3,8 @@
 import React from 'react';
 import { useUIStore } from "@/lib/store";
 import Sidebar from "./Sidebar";
-import RightDetailsPanel from "./details/RightDetailsPanel";
-import BottomSheetDetails from "./details/BottomSheetDetails";
+import RightDetailsPanel from "../details/RightDetailsPanel";
+import BottomSheetDetails from "../details/BottomSheetDetails";
 import BottomNav from "./BottomNav"; 
 import PwaInstallBanner from "./PwaInstallBanner";
 import clsx from "clsx";
@@ -13,11 +13,11 @@ import TopBarDesktop from "./TopBarDesktop";
 import MobileSettingsDrawer from "./MobileSettingsDrawer";
 
 import { useAuthUser } from "@/lib/hooks/useData";
-import FullScreenLogin from "@/components/FullScreenLogin";
+import FullScreenLogin from "@/components/auth/FullScreenLogin";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
-import { hasOnboarded } from "@/lib/pwa";
+import { hasOnboarded } from "@/lib/utils/pwa";
 
-import AccessDenied from "@/components/AccessDenied";
+import AccessDenied from "@/components/auth/AccessDenied";
 
 const ALLOWED_EMAILS = ['anirudhpottammal@gmail.com', 'saesharajput@gmail.com'];
 
