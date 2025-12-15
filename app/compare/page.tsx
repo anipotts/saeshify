@@ -104,9 +104,33 @@ function CompareContent() {
       });
   };
 
-  if (loading || !current) return (
+  if (loading) return (
       <div className="flex items-center justify-center h-full w-full bg-[#121212] text-white/50 text-sm font-bold tracking-widest animate-pulse absolute inset-0 z-50">
         LOADING MATCHUP...
+      </div>
+  );
+
+  if (!current) return (
+      <div className="flex flex-col items-center justify-center h-full w-full bg-[#121212] absolute inset-0 z-50 p-6 text-center">
+            <button 
+                onClick={() => router.back()}
+                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+            >
+                <X size={24} />
+            </button>
+            <div className="w-16 h-16 bg-zinc-800 text-zinc-400 rounded-full flex items-center justify-center mb-6">
+                 <X size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">All caught up!</h2>
+            <p className="text-zinc-400 mb-8 max-w-sm">
+                You've ranked all the songs in your vault for now. Add more songs to continue ranking.
+            </p>
+            <button 
+                onClick={() => router.push('/')}
+                className="bg-white text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform"
+            >
+                Find more songs
+            </button>
       </div>
   );
 

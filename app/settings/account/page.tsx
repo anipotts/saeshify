@@ -55,8 +55,7 @@ export default function AccountPage() {
             }}
             className="mt-6 bg-[#1DB954] text-black font-bold py-3 px-8 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center gap-2"
           >
-            <Image src="/spotify-icon-black.png" alt="" width={20} height={20} className="hidden" /> 
-            Sign in with Spotify
+            Continue with Spotify
           </button>
         )}
       </div>

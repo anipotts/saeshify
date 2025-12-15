@@ -16,8 +16,9 @@ import { useAuthUser } from "@/lib/hooks/useData";
 import FullScreenLogin from "@/components/auth/FullScreenLogin";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 import { hasOnboarded } from "@/lib/utils/pwa";
-
+import { getUserPreferences, updateUserPreferences } from "@/lib/actions/preferences";
 import AccessDenied from "@/components/auth/AccessDenied";
+import { useOnlineStatus } from "@/lib/hooks/useOnlineStatus";
 
 const ALLOWED_EMAILS = ['anirudhpottammal@gmail.com', 'saesharajput@gmail.com'];
 
@@ -26,12 +27,39 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [isMobileSettingsOpen, setMobileSettingsOpen] = React.useState(false);
   const { user, loading } = useAuthUser();
   const [isOnboardingComplete, setIsOnboardingComplete] = React.useState(false);
+  const [prefsLoaded, setPrefsLoaded] = React.useState(false);
+  const isOnline = useOnlineStatus();
 
-  // Check onboarding on mount
+  // Check onboarding & Load Prefs on mount
   React.useEffect(() => {
-      // We only assume onboarding complete if flag is set using our lib
+      // 1. Onboarding Check
       setIsOnboardingComplete(hasOnboarded());
+
+      // 2. Load Preferences
+      const load = async () => {
+          try {
+              const prefs = await getUserPreferences();
+              if (prefs) {
+                  if (typeof prefs.details_panel_open === 'boolean') {
+                      useUIStore.setState({ isDetailsOpen: prefs.details_panel_open });
+                  }
+                  // if (prefs.details_width) useUIStore.setState({ detailsWidth: prefs.details_width });
+              }
+          } catch (e) {
+              console.error("Failed to load prefs", e);
+          } finally {
+              setPrefsLoaded(true);
+          }
+      };
+      load();
   }, []);
+
+  // Sync Panel State to DB
+  React.useEffect(() => {
+      if (prefsLoaded && user) {
+          updateUserPreferences({ details_panel_open: isDetailsOpen }).catch(err => console.error(err));
+      }
+  }, [isDetailsOpen, prefsLoaded, user]);
 
   // 1. Loading State
   if (loading) return <div className="h-screen bg-black" />;
@@ -57,7 +85,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   // 5. Logged In, Allowed & Onboarded -> Main App
   return (
-    <div className="h-full bg-black text-white flex flex-col md:h-screen md:overflow-hidden">
+    <div className="h-full bg-black text-white flex flex-col md:h-screen md:overflow-hidden relative">
+       {!isOnline && (
+          <div className="bg-[#E91429] text-white text-[11px] font-bold text-center py-1 absolute top-0 left-0 right-0 z-[100] tracking-wider uppercase">
+             No Internet Connection
+          </div>
+       )}
         
        {/* 1. Desktop Top Bar */}
        <React.Suspense fallback={<div className="h-[64px] hidden md:block bg-black mb-2" />}>
