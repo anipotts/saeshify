@@ -23,7 +23,7 @@ export default function PageHeader({ title, children }: PageHeaderProps) {
       "border-b border-[#2A2A2A]" // Divider
     )}>
        {/* Row 1: Title */}
-       <div className="flex items-center h-10 mb-2 pl-12 md:pl-0">
+       <div className="flex items-center h-10 mb-2 pl-16 md:pl-0">
          <h1 className="text-2xl font-bold tracking-tight text-white">{title}</h1>
        </div>
 

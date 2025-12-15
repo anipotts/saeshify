@@ -21,6 +21,7 @@ export function normalizeSpotifyTrack(track: any) {
     artist_ids: artistIds,
     cover_url: track.album.images?.[0]?.url || null, // Denormalized for speed
     preview_url: track.preview_url || null,
+    duration_ms: track.duration_ms,
   };
 
   return {

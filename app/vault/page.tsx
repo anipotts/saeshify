@@ -161,7 +161,7 @@ export default function VaultPage() {
                    
                    {/* Duration (Desktop) */}
                    <div className="hidden md:block w-24 text-right pr-4 text-sm text-muted-foreground font-variant-numeric tabular-nums">
-                      {formatDuration(track.duration_ms)}
+                      {formatDuration(track.duration_ms || 0)}
                    </div>
 
                   {/* Overflow Menu Trigger */}
