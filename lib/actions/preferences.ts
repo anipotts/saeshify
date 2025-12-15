@@ -8,6 +8,8 @@ export interface UserPreferences {
   display_name: string | null;
   avatar_url: string | null;
   explicit_content: boolean;
+  details_panel_open?: boolean;
+  details_width?: number;
 }
 
 export async function getUserPreferences() {
@@ -35,6 +37,8 @@ export async function getUserPreferences() {
       display_name: user.user_metadata?.full_name || null,
       avatar_url: user.user_metadata?.avatar_url || null,
       explicit_content: true,
+      details_panel_open: false,
+      details_width: 360,
     };
   }
 

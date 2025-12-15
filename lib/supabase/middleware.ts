@@ -36,7 +36,32 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: You *must* run the getUser/getSession to trigger the token refresh
   // if needed.
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const path = request.nextUrl.pathname;
+  const protectedRoutes = ['/vault', '/rankings', '/compare'];
+
+  // Redirect if not logged in and trying to access protected route
+  if (!user && protectedRoutes.some(route => path.startsWith(route))) {
+     const url = request.nextUrl.clone();
+     url.pathname = '/settings/account';
+     url.searchParams.set('next', path); // Allow return after login
+     return NextResponse.redirect(url);
+  }
+
+  // TODO: Server-side Allowlist Check?
+  // We can do it here, but it might be heavy. For now, we rely on RLS not returning data if strict.
+  // But strictly blocking UI is better.
+  // Let's keep it simple for now as requested: Auth Guard first.
+  // If we want strict allowlist here:
+  /*
+  if (user && path !== '/settings/account' && path !== '/access-denied') {
+     // Check allowlist table? Or hardcode for speed?
+     // Database check is better source of truth.
+     // const allowed = await supabase.rpc('is_authorized'); 
+     // This needs the migration applied.
+  }
+  */
 
   return supabaseResponse
 }

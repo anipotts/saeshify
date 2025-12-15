@@ -11,6 +11,7 @@ import { saveTrackToVault } from "@/lib/actions/vault";
 import PageHeader from "@/components/ui/PageHeader";
 import DebugVaultRow from "@/components/debug/DebugVaultRow";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { recordRecentSearch } from "@/lib/actions/recents";
 
 interface RecentSearch {
   id: string;
@@ -84,11 +85,15 @@ function SearchContent() {
     localStorage.setItem("saeshify_recent_searches", JSON.stringify(updated));
   };
 
+  // No import here
+
+  // ...
+
   const handleResultClick = (type: "track" | "artist" | "album", data: any) => {
     // 1. Open Details
     openDetails({ kind: type, id: data.id, payload: data });
     
-    // 2. Add to Recent
+    // 2. Add to Recent (Local)
     const image = type === 'track' ? data.album.images[0]?.url 
                 : data.images ? data.images[0]?.url : null;
                 
@@ -99,6 +104,14 @@ function SearchContent() {
       subtitle: type === 'track' ? data.artists[0].name : type,
       image,
       data
+    });
+
+    // 3. Persist to DB (Fire & Forget)
+    recordRecentSearch({
+        kind: type,
+        query: data.name,
+        spotify_id: data.id,
+        payload: data
     });
   };
 

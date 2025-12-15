@@ -17,6 +17,10 @@ interface RecentItem {
   data: any;
 }
 
+import { getRecentSearches } from "@/lib/actions/recents";
+
+// ... existing imports
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -26,21 +30,40 @@ export default function Sidebar() {
 
   useEffect(() => {
     setMounted(true);
-    // Listen to storage events or just load once? 
-    // Ideally we want to update when search happens. 
-    // Usually simple useEffect only runs on mount. 
-    // For now simple load is fine.
-    const loadRecents = () => {
+
+    const loadRecents = async () => {
+        // 1. Local
+        let local: RecentItem[] = [];
         const stored = localStorage.getItem("saeshify_recent_searches");
         if (stored) {
-           try {
-             setRecents(JSON.parse(stored));
-           } catch(e) {}
+           try { local = JSON.parse(stored); } catch(e) {}
+        }
+        setRecents(local); // Show immediate
+
+        // 2. Server (Merge)
+        try {
+            const serverRecents = await getRecentSearches();
+            if (serverRecents && serverRecents.length > 0) {
+               // Merge: Server items first, then local items that aren't in server
+               // Dedupe by id or title (using Set for O(1) ideally, or simple filter)
+               // serverRecents are RecentItem[] already transformed
+               const seen = new Set(serverRecents.map((x: any) => x.id || x.title));
+               const merged = [
+                   ...serverRecents,
+                   ...local.filter(l => !seen.has(l.id || l.title))
+               ];
+               setRecents(merged.slice(0, 50)); // Limit
+               
+               // Optional: Update local to match strict sync?
+               localStorage.setItem("saeshify_recent_searches", JSON.stringify(merged.slice(0, 50)));
+            }
+        } catch (err) {
+            console.error("Recents fetch failed", err);
         }
     };
     loadRecents();
     
-    // Optional: Window listener for updates if multiple tabs or same page updates
+    // Listen for local storage updates (from other tabs or search page)
     window.addEventListener('storage', loadRecents);
     return () => window.removeEventListener('storage', loadRecents);
   }, []);

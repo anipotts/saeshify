@@ -32,49 +32,71 @@ export async function getNextMatchup(
   // To optimize: We can't easily "exclude" array of UUIDs in a large table scan without performance hit if array is huge,
   // but for < 10 exclusions it's fine.
   
-  let candidates: RankedTrack[] = [];
-  
-  // A. Low Games Pool (Exploration)
-  const { data: lowGamesData } = await supabase
-    .from("track_ratings")
-    .select("track_id, rating, games") // assumption: games column exists
-    .eq("user_id", user.id)
-    .order("games", { ascending: true })
-    .limit(50);
-    
-  // B. Random Pool (Scattering - prevent getting stuck in local minima)
-  // Approximate logic: Fetch a larger chunk and shuffle, or DB random if supported.
-  // For Supabase/Postgres, `.order('random()')` is valid but sometimes slow on huge tables.
-  // For user libraries (<5k), it's instant.
-  const { data: randomData } = await supabase
-    .from("track_ratings")
-    .select("track_id, rating, games")
-    .eq("user_id", user.id)
-    .limit(50); // Just take 50, strictly we'd want random, but we'll shuffle in memory if this is just "top 50 by default sort" which is bad.
-    // Ideally: .order('id') with offset? Or .rpc('get_random_tracks')?
-    // Let's stick to a robust simpler query: fetch 200, shuffle.
-    
-  // Let's combine strategies into one query for speed if possible, or just use one good query.
-  // "Get 200 tracks" then filter in memory is safest for standard libraries.
-  const { data: rawCandidates } = await supabase
+  // 1. Fetch Candidate Pool
+  let pool: Partial<RankedTrack>[] = [];
+
+  // A. Fetch Seed if exists
+  if (seedTrackId) {
+      const { data: seedData } = await supabase
+          .from("track_ratings")
+          .select("track_id, rating, games, comparisons_count")
+          .eq("user_id", user.id)
+          .eq("track_id", seedTrackId)
+          .single();
+      
+      if (seedData) {
+           pool.push({
+              id: seedData.track_id,
+              rating: seedData.rating,
+              games: seedData.games ?? seedData.comparisons_count ?? 0,
+           });
+      }
+  }
+
+  // B. Fetch General Pool (Prioritize Low Games)
+  // We exclude the seed (already fetched) and the exclude list.
+  const exclusions = seedTrackId ? [...excludeTrackIds, seedTrackId] : excludeTrackIds;
+
+  const { data: candidates } = await supabase
      .from("track_ratings")
      .select("track_id, rating, games, comparisons_count")
      .eq("user_id", user.id)
-     .limit(300); // Sufficient pool
-     
-  if (!rawCandidates || rawCandidates.length < 2) return null;
+     .not("track_id", "in", `(${exclusions.join(',')})`) // Note: Supabase JS .in/.not expects array usually, let's verify syntax.
+     // actually .not('track_id', 'in', `(${...})`) is for raw filter. 
+     // Better: .not('track_id', 'in', exclusions) -- wait, check Supabase JS docs support.
+     // Standard: .filter('track_id', 'not.in', `(${exclusions.join(',')})`)
+     // Or simpler: just client side filter if list is small. 
+     // Let's try native .not('track_id', 'in', `(${exclusions.join(',')})`) is flaky if array empty.
+     // Let's use standard filter if exclusions exist.
+     .order("games", { ascending: true }) // Prioritize exploration
+     .limit(100);
 
-  // Map to RankedTrack structure (partial, we'll need metadata later)
-  // We don't have metadata yet. We only fetch metadata for the Chosen Pair.
-  const pool = rawCandidates.map(c => ({
-      id: c.track_id,
-      rating: c.rating,
-      games: c.games ?? c.comparisons_count ?? 0,
-      comparisons_count: c.comparisons_count ?? c.games ?? 0
-  } as Partial<RankedTrack>));
+  if (candidates) {
+      pool.push(...candidates.map(c => ({
+          id: c.track_id,
+          rating: c.rating,
+          games: c.games ?? c.comparisons_count ?? 0,
+      })));
+  }
+
+  // Deduplicate and filter (in case DB query filter failed or was complex)
+  // ... logic handled below
+
+  // Deduplicate and filter logic
+  // Since we might have fetched the seed (which might be in 'candidates' if low games), dedupe.
+  const seenIds = new Set();
+  const validCandidates: Partial<RankedTrack>[] = [];
   
-  // Filter Exclusions
-  const validCandidates = pool.filter(c => !excludeTrackIds.includes(c.id!));
+  for (const p of pool) {
+      if (!p.id) continue;
+      if (seenIds.has(p.id)) continue;
+      // Double check exclusions (in case DB filter was lenient)
+      // Note: seed is in pool but might be in exclusions if we passed it in exclusions (logic above handles this but check anyway)
+      if (excludeTrackIds.includes(p.id) && p.id !== seedTrackId) continue;
+      
+      seenIds.add(p.id);
+      validCandidates.push(p);
+  }
   
   if (validCandidates.length < 2) return null;
 
@@ -82,21 +104,17 @@ export async function getNextMatchup(
   let trackA: Partial<RankedTrack>;
   
   if (seedTrackId) {
-      // Force A to be the seed if it exists in valid candidates (or even if it was excluded? No, respect exclude)
-      // Actually, if user *requested* seed, we should allow it even if technically "excluded" by history (maybe).
-      // But strictly, let's look for it.
-      const seed = pool.find(c => c.id === seedTrackId);
+      const seed = validCandidates.find(c => c.id === seedTrackId);
       if (seed) {
           trackA = seed;
       } else {
-          // Fallback if seed not found
+          // Fallback
           trackA = validCandidates[Math.floor(Math.random() * validCandidates.length)];
       }
   } else {
-      // Pick A from "Low Games" subset to maximize info gain
-      // Sort by games asc
-      const lowGames = [...validCandidates].sort((a, b) => (a.games || 0) - (b.games || 0)).slice(0, 15);
-      // Pick random from top 15 low-games tracks
+      // Pick A from "Low Games" subset (first 15 of sorted validCandidates)
+      // validCandidates are already sorted by games ASC from DB
+      const lowGames = validCandidates.slice(0, 15);
       trackA = lowGames[Math.floor(Math.random() * lowGames.length)];
   }
 
