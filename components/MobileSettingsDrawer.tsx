@@ -65,68 +65,31 @@ export default function MobileSettingsDrawer({ isOpen, onClose }: { isOpen: bool
                {/* Menu Sections */}
                <div className="space-y-6">
                   
-                  {/* Account */}
-                  <section className="space-y-2">
+                   {/* Account Info - Minimal */}
+                   <section className="space-y-2">
                      <h3 className="text-sm font-bold text-white px-2">Account</h3>
                      <div className="space-y-1">
-                        <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
-                           <span className="text-base text-white">Premium Plan</span>
-                           <span className="text-sm text-neutral-400">Individual</span>
-                        </div>
                         <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
                             <span className="text-base text-white">Email</span>
                             <span className="text-sm text-neutral-400 truncate max-w-[150px]">{user?.email || "No email"}</span>
                         </div>
                      </div>
-                  </section>
-                  
-                  {/* Preferences */}
-                  <section className="space-y-2">
-                     <h3 className="text-sm font-bold text-white px-2">Data Saver</h3>
-                     <div className="space-y-1">
-                        <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
-                           <span className="text-base text-white">Audio Quality</span>
-                           <span className="text-sm text-neutral-400">Normal</span>
-                        </div>
-                        <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
-                           <span className="text-base text-white">Video Podcasts</span>
-                           <div className="w-10 h-6 bg-accent rounded-full relative">
-                              <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                           </div>
-                        </div>
-                     </div>
-                  </section>
+                   </section>
 
-                  {/* Playback */}
-                  <section className="space-y-2">
-                     <h3 className="text-sm font-bold text-white px-2">Playback</h3>
-                     <div className="space-y-1">
-                        <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
-                           <span className="text-base text-white">Crossfade</span>
-                           <span className="text-sm text-neutral-400">0s</span>
-                        </div>
-                        <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
-                           <span className="text-base text-white">Gapless Playback</span>
-                           <div className="w-10 h-6 bg-accent rounded-full relative">
-                              <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                           </div>
-                        </div>
-                        <div className="px-2 py-3 flex items-center justify-between active:bg-white/5 rounded-md">
-                           <span className="text-base text-white">Automix</span>
-                           <div className="w-10 h-6 bg-zinc-700 rounded-full relative">
-                              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                           </div>
-                        </div>
-                     </div>
-                  </section>
-
-                  <div className="pt-8 pb-12 flex justify-center">
-                     <button onClick={() => { /* Logout logic */ }} className="bg-white text-black font-bold py-3 px-8 rounded-full">
-                        Log out
-                     </button>
-                  </div>
-
-               </div>
+                   <div className="pt-8 pb-12 flex justify-center">
+                      <button 
+                        onClick={async () => {
+                           const { createClient } = await import("@/lib/supabase/client");
+                           const supabase = createClient();
+                           await supabase.auth.signOut();
+                           window.location.reload();
+                        }} 
+                        className="bg-white text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform"
+                      >
+                         Log out
+                      </button>
+                   </div>
+                </div>
             </div>
           </motion.div>
         </>

@@ -95,7 +95,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           )}>
                {/* Mobile Header Elements (Avatar + Settings Trigger) */}
                {/* Search bar for mobile is inside page content, but Avatar is global topmost */}
-               <div className="md:hidden absolute top-4 left-4 z-50">
+               <div className="md:hidden fixed top-4 left-4 z-50">
                   <div 
                     onClick={() => setMobileSettingsOpen(true)}
                     className="w-12 h-12 rounded-full overflow-hidden relative border border-white/10 shadow-lg"
