@@ -80,7 +80,7 @@ export default function OnboardingFlow() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">1. Tap Share</h3>
-                  <p className="text-neutral-400">Look for the square icon with an arrow in the browser bar.</p>
+                  <p className="text-neutral-400">Look for the square icon with an arrow at the bottom.</p>
                 </div>
               </div>
 
@@ -90,7 +90,7 @@ export default function OnboardingFlow() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">2. Add to Home Screen</h3>
-                  <p className="text-neutral-400">Scroll down the share sheet until you see this option.</p>
+                  <p className="text-neutral-400">Scroll down until you see this option.</p>
                 </div>
               </div>
 
@@ -100,7 +100,7 @@ export default function OnboardingFlow() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">3. Tap 'Add'</h3>
-                  <p className="text-neutral-400">Confirm directly in the top corner.</p>
+                  <p className="text-neutral-400">Confirm in the top corner.</p>
                 </div>
               </div>
             </div>

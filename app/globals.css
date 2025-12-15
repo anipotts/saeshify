@@ -1,19 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #FFFFFF;
+  --font-figtree: 'Figtree', sans-serif;
   
-  /* Spotify Palette */
-  --spotify-green: #1DB954;
-  --spotify-black: #191414;
-  --spotify-white: #FFFFFF;
-  --spotify-gray-dark: #212121;
-  --spotify-gray: #535353;
-  --spotify-gray-light: #B3B3B3;
-
+  --background: #121212;
+  --surface: #181818; 
+  --border: #2A2A2A;
+  --foreground: #FFFFFF;
+  --muted: #B3B3B3;
+  --accent: #1DB954;
+  
   /* Safe Area Variables */
   --sat: env(safe-area-inset-top);
   --sar: env(safe-area-inset-right);
@@ -21,22 +21,9 @@
   --sal: env(safe-area-inset-left);
 }
 
-/* Specific Safe Area Utilities if needed, mostly used in padding */
-.pb-safe {
-  padding-bottom: var(--sab);
-}
-.pt-safe {
-  padding-top: var(--sat);
-}
-
 body {
   color: var(--foreground);
   background: var(--background); /* Fallback */
-  overscroll-behavior-y: none;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  overscroll-behavior: none; /* Point 9: Disable scroll bounce */
+  font-family: var(--font-figtree); /* Explicitly set default font */
 }

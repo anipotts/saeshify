@@ -9,7 +9,11 @@ const config: Config = {
     extend: {
       colors: {
         background: "var(--background)",
+        surface: "var(--surface)",
+        border: "var(--border)",
         foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        accent: "var(--accent)",
         spotify: {
           green: "var(--spotify-green)", // #1DB954
           black: "var(--spotify-black)", // #191414
@@ -20,7 +24,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
+        sans: ["Figtree", "sans-serif"],
       },
     },
   },
