@@ -78,7 +78,7 @@ export default function RankingsPage() {
           <div className="flex flex-col items-center justify-center py-32 opacity-100 space-y-6 text-center">
              <div className="space-y-2">
                <h2 className="text-xl font-bold text-foreground">No rankings yet</h2>
-               <p className="text-sm text-muted-foreground">Start comparing songs to generate rankings.</p>
+               <p className="text-sm text-muted-foreground">Rate some songs to get started.</p>
              </div>
           </div>
         ) : (

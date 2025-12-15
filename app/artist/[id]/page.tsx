@@ -8,6 +8,7 @@ import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
 // Assuming saveTrack uses standardized spotify object or we adapt.
 
 import { Check, Plus } from "lucide-react";
+import SpotifyLinkButton from "@/components/ui/SpotifyLinkButton";
 
 // Sub-component for Track Row to handle its own interaction or pass up
 function TrackRow({ track, index }: { track: any, index: number }) {
@@ -119,9 +120,7 @@ export default function ArtistPage() {
              <button className="w-14 h-14 bg-[#1DB954] rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg text-black">
                  <Play size={28} fill="currentColor" className="ml-1" />
              </button>
-             <button className="px-6 py-2 border border-white/30 rounded-full font-bold text-sm hover:border-white transition-colors">
-                 Follow
-             </button>
+             <SpotifyLinkButton type="artist" id={artist.id} variant="outline" className="rounded-full border-white/30 hover:border-white" />
          </div>
 
          {/* Top Tracks */}
