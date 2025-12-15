@@ -19,7 +19,7 @@ export default function Sidebar() {
       <div className="bg-[#121212] rounded-lg p-4 flex flex-col gap-5">
         <Link href="/" className="flex items-center gap-2 px-2">
            {/* Simple text logo matching specific request */}
-           <span className="text-white font-bold text-xl tracking-tight">Saeshify</span>
+           <span className="text-accent font-bold text-xl tracking-tight">Saeshify</span>
         </Link>
         
         <nav className="flex flex-col gap-4">

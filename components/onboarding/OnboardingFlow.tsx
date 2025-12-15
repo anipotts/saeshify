@@ -5,20 +5,17 @@ import { isStandalone, hasOnboarded, setOnboarded } from "@/lib/pwa";
 import { Share, PlusSquare, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function OnboardingFlow() {
-  const [show, setShow] = useState(false);
+export default function OnboardingFlow({ onComplete }: { onComplete?: () => void }) {
+  // Initialize directly from localStorage to avoid flash
+  const [show, setShow] = useState(() => !hasOnboarded());
   const [step, setStep] = useState<"intro" | "instructions">("intro");
 
-  useEffect(() => {
-    // Check if running in browser and not yet onboarded
-    if (!isStandalone() && !hasOnboarded()) {
-      setShow(true);
-    }
-  }, []);
+
 
   const handleDismiss = () => {
     setOnboarded();
     setShow(false);
+    if (onComplete) onComplete();
   };
 
   const handleScan = () => {
@@ -43,10 +40,6 @@ export default function OnboardingFlow() {
               className="space-y-4"
             >
               <h1 className="text-4xl font-bold tracking-tight text-[#1DB954]">Saeshify</h1>
-              <div className="space-y-2 max-w-xs mx-auto text-neutral-300">
-                <p>Add this to your Home Screen.</p>
-                <p>Then it opens like a regular app.</p>
-              </div>
             </motion.div>
 
             <div className="w-full max-w-xs space-y-3 pt-8">
@@ -56,12 +49,7 @@ export default function OnboardingFlow() {
               >
                 Add to Home Screen
               </button>
-              <button 
-                onClick={handleDismiss}
-                className="w-full text-neutral-500 font-medium py-2 active:text-white transition-colors"
-              >
-                Not now
-              </button>
+
             </div>
           </div>
         ) : (

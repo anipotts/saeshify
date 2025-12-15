@@ -20,6 +20,22 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Saeshify",
   },
+  openGraph: {
+    title: "Saeshify",
+    description: "Spotify for Saesha",
+    images: [
+      {
+        url: "/saeshify-banner.png",
+        width: 1200,
+        height: 630,
+        alt: "Saeshify",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/saeshify-banner.png"],
+  },
 };
 
 export default function RootLayout({

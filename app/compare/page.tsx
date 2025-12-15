@@ -1,120 +1,144 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import { X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Play } from "lucide-react";
+import { submitVoteAndFetchNext } from "@/lib/actions/vote";
+import { useUIStore } from "@/lib/store";
+import { getNextMatchup } from "@/lib/ranking/matchmaking";
 
-// Mock Data Type
-type ComparisonItem = {
-  id: string;
-  name: string;
-  artist: string;
-  image: string;
-  color?: string;
-};
+function MatchupCard({ track, onClick, position }: { track: any, onClick: () => void, position: "top" | "bottom" | "left" | "right" }) {
+    if (!track) return <div className="flex-1 bg-black" />;
+    
+    return (
+        <div 
+            onClick={onClick}
+            className="relative flex-1 group cursor-pointer overflow-hidden border-b md:border-b-0 md:border-r border-[#2A2A2A] last:border-0"
+        >
+            {/* Background Image (Blurred) */}
+            <div className="absolute inset-0 z-0">
+               {track.cover_url ? (
+                   <Image src={track.cover_url} alt="" fill className="object-cover opacity-30 blur-xl scale-110" />
+               ) : (
+                   <div className="w-full h-full bg-zinc-900" />
+               )}
+               <div className="absolute inset-0 bg-black/60" />
+            </div>
+
+            {/* Content Container */}
+            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-8 transition-transform duration-200 group-hover:scale-[1.02]">
+                {/* Album Art (Clean) */}
+                <div className="w-48 h-48 md:w-64 md:h-64 shadow-2xl rounded-lg mb-6 relative overflow-hidden ring-1 ring-white/10 group-hover:ring-white/30 transition-all">
+                    {track.cover_url ? (
+                        <Image src={track.cover_url} alt={track.name} fill className="object-cover" />
+                    ) : (
+                        <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                            <Play size={40} className="text-white/20" />
+                        </div>
+                    )}
+                </div>
+
+                {/* Text */}
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl md:text-4xl font-black text-white leading-tight drop-shadow-lg max-w-lg">
+                        {track.name}
+                    </h2>
+                    <p className="text-lg md:text-xl text-white/70 font-medium">
+                        {track.artist_name || track.artists?.[0]?.name}
+                    </p>
+                </div>
+            </div>
+
+            {/* Hover overlay hint */}
+            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors pointer-events-none" />
+        </div>
+    );
+}
 
 function CompareContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const albumId = searchParams.get('album');
-  const supabase = createClient();
+  const seedId = searchParams.get('seed') || undefined;
   
-  const [queue, setQueue] = useState<any[]>([]);
-  const [currentPair, setCurrentPair] = useState<[ComparisonItem, ComparisonItem] | null>(null);
+  const [pair, setPair] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isVoting, startTransition] = useTransition();
 
+  // Initial Load
   useEffect(() => {
-    const q = JSON.parse(localStorage.getItem('comparison_queue') || '[]');
-    if (q.length > 0) {
-      setQueue(q);
-      setCurrentPair([
-        { id: '1', name: 'New Song', artist: 'Artist A', image: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b' },
-        { id: '2', name: 'Old Favorite', artist: 'Artist B', image: 'https://i.scdn.co/image/ab67616d0000b27394d28d01170bd7be5eb65910' }
-      ]);
-    }
-  }, []);
+    let mounted = true;
+    getNextMatchup(seedId).then(data => {
+        if (mounted) {
+            setPair(data);
+            setLoading(false);
+        }
+    });
+    return () => { mounted = false; };
+  }, [seedId]);
 
-  const handleChoice = async (winnerId: string | 'skip') => {
-    if (!currentPair) return;
-
-    if (winnerId !== 'skip') {
-       const loserId = currentPair[0].id === winnerId ? currentPair[1].id : currentPair[0].id;
-       const { error } = await supabase.rpc('record_comparison', {
-         p_winner_id: winnerId,
-         p_loser_id: loserId,
-         p_album_id: albumId || null
-       });
-       if (error) console.error('Error recording comparison:', error);
-    }
-    
-    const nextQueue = queue.slice(1);
-    setQueue(nextQueue);
-    
-    if (nextQueue.length > 0) {
-        // Here we just go back to home if "done" for the demo
-        router.back(); 
-    } else {
-        router.back();
-    }
+  const handleVote = async (winnerId: string, loserId: string) => {
+      // Optimistic / Transition
+      // We could fade out immediately, but waiting for server is safer for ensuring valid next pair
+      // Beli feels instant because they might prefetch. 
+      // We'll show a "Selection" state (e.g. flash green) then load next.
+      
+      startTransition(async () => {
+         // Call Server Action
+         const next = await submitVoteAndFetchNext(winnerId, loserId, seedId);
+         if (next) {
+            setPair(next);
+         } else {
+             // No more pairs? Back to queue?
+             // Or keep going with null seed?
+             // For now, if null, user finishes
+             router.back();
+         }
+      });
   };
 
-  const x = useMotionValue(0);
-  const opacityRight = useTransform(x, [0, 100], [0, 1]);
-  const opacityLeft = useTransform(x, [0, -100], [0, 1]);
-  const rotate = useTransform(x, [-200, 200], [-10, 10]);
+  if (loading || !pair) return (
+      <div className="flex items-center justify-center h-full bg-black text-white/50 text-sm font-bold tracking-widest animate-pulse">
+        ENTERING THE ARENA...
+      </div>
+  );
 
-  if (!currentPair) return <div className="bg-black min-h-screen text-white flex items-center justify-center">Loading Arena...</div>;
+  const [trackA, trackB] = pair;
 
   return (
-    <div className="fixed inset-0 bg-neutral-950 z-50 flex flex-col">
-       <div className="flex justify-between items-center p-4 pt-[env(safe-area-inset-top)]">
-         <span className="text-white/50 text-sm font-medium tracking-widest uppercase">This or That</span>
-         <button onClick={() => router.back()} className="p-2 bg-white/10 rounded-full"><X size={20} /></button>
-       </div>
+    <div className="fixed inset-0 z-50 bg-black flex flex-col md:flex-row">
+        
+        {/* Close Button (Floating) */}
+        <button 
+            onClick={() => router.back()}
+            className="absolute top-safe-4 right-4 z-[60] p-3 text-white/50 hover:text-white bg-black/20 hover:bg-black/60 backdrop-blur-md rounded-full transition-all"
+        >
+            <X size={24} />
+        </button>
 
-       <div className="flex-1 flex flex-col items-center justify-center relative px-6 gap-6">
-          <div className="w-full max-w-sm aspect-[3/4] relative">
-              <motion.div 
-                style={{ x, rotate, touchAction: "none" }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={(e, { offset, velocity }) => {
-                  if (offset.x > 100) handleChoice(currentPair[0].id);
-                  else if (offset.x < -100) handleChoice(currentPair[1].id);
-                }}
-                className="absolute inset-0 bg-[#282828] rounded-2xl overflow-hidden shadow-2xl cursor-grab active:cursor-grabbing border border-white/5"
-              >
-                  <div className="relative h-2/3 w-full">
-                    <Image src={currentPair[0].image} alt={currentPair[0].name} fill className="object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#282828] to-transparent" />
-                  </div>
-                  <div className="p-6">
-                    <h2 className="text-3xl font-bold mb-1 text-white">{currentPair[0].name}</h2>
-                    <p className="text-[#B3B3B3] text-lg">{currentPair[0].artist}</p>
-                  </div>
-                  
-                  <motion.div style={{ opacity: opacityRight }} className="absolute top-8 left-8 border-4 border-[#1DB954] text-[#1DB954] rounded-lg px-4 py-2 text-2xl font-black uppercase -rotate-12 bg-black/20 backdrop-blur-sm">
-                    LIKE
-                  </motion.div>
-                   <motion.div style={{ opacity: opacityLeft }} className="absolute top-8 right-8 border-4 border-red-500 text-red-500 rounded-lg px-4 py-2 text-2xl font-black uppercase rotate-12 bg-black/20 backdrop-blur-sm">
-                    PASS
-                  </motion.div>
-              </motion.div>
-              
-              <div className="absolute inset-0 bg-[#181818] rounded-2xl -z-10 scale-95 translate-y-4 opacity-50 flex items-end p-6">
-                 <div>
-                    <h2 className="text-xl font-bold text-white/50">{currentPair[1].name}</h2>
-                 </div>
-              </div>
-          </div>
-       </div>
+        {/* VS Badge (Center) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-white text-black rounded-full flex items-center justify-center font-black italic text-lg md:text-2xl shadow-xl ring-4 ring-black/50">
+                VS
+            </div>
+        </div>
 
-       <div className="pb-[calc(env(safe-area-inset-bottom)+20px)] flex justify-center gap-4 px-6">
-          <button onClick={() => handleChoice('skip')} className="bg-[#282828] text-white font-bold py-4 px-8 rounded-full flex-1">Skip</button>
-          <button className="bg-[#282828] text-white font-bold py-4 px-8 rounded-full flex-1">Too Hard</button>
-       </div>
+        {/* Voting Layout */}
+        {/* Mobile: Col (Top A, Bottom B). Desktop: Row (Left A, Right B) */}
+        
+        <MatchupCard 
+            track={trackA} 
+            position="left" 
+            onClick={() => !isVoting && handleVote(trackA.id, trackB.id)} 
+        />
+        
+        <MatchupCard 
+            track={trackB} 
+            position="right" 
+            onClick={() => !isVoting && handleVote(trackB.id, trackA.id)} 
+        />
+
     </div>
   );
 }

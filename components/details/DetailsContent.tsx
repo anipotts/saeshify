@@ -33,9 +33,14 @@ export default function DetailsContent() {
 
   const handleAddToVault = async () => {
     try {
-      await saveTrackToVault(data);
-      // Ideally show toast or close details
-      // closeDetails();
+      const result = await saveTrackToVault(data);
+      if (!result.success) {
+         if (result.code === 401) window.location.href = "/settings/account";
+         else alert("Error: " + result.error);
+      } else {
+        // closeDetails();
+        // Maybe show checkmark?
+      }
     } catch(e) { console.error(e); }
   };
  

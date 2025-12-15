@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRankings } from "@/lib/hooks/useData";
 import { useUIStore } from "@/lib/store";
 import { Trophy, Info } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 import clsx from "clsx";
 
 export default function RankingsPage() {
@@ -22,47 +23,42 @@ export default function RankingsPage() {
     <div className="min-h-full pb-safe">
       
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md pt-4 pb-0 border-b border-white/5">
-        <div className="flex items-center justify-between pt-2 px-4 mb-4">
-           <h1 className="text-2xl font-bold tracking-tight text-foreground">Rankings</h1>
-        </div>
-
-        {/* Tabs/Pills */}
-        <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
-           <button 
-             onClick={() => setFilter('tracks')}
-             className={clsx(
-               "px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
-               filter === 'tracks' ? "bg-white text-black" : "bg-zinc-800 text-muted-foreground hover:bg-zinc-700 hover:text-white"
-             )}
-           >
-             Tracks
-           </button>
-           
-           <div className="group relative">
-             <button 
-               className="px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-800/50 text-muted-foreground/50 cursor-not-allowed whitespace-nowrap border border-transparent"
-             >
-               Artists
-             </button>
-             {/* Tooltip */}
-             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-zinc-800 text-xs text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                Coming soon
-             </div>
-           </div>
-
-           <div className="group relative">
-             <button 
-               className="px-4 py-1.5 rounded-full text-sm font-medium bg-zinc-800/50 text-muted-foreground/50 cursor-not-allowed whitespace-nowrap border border-transparent"
-             >
-               Albums
-             </button>
-             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-zinc-800 text-xs text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                Coming soon
-             </div>
-           </div>
-        </div>
-      </div>
+      <PageHeader title="Rankings">
+         {/* Tabs/Pills */}
+         <div className="flex gap-2 pb-3 overflow-x-auto no-scrollbar md:pb-0">
+            <button 
+              onClick={() => setFilter('tracks')}
+              className={clsx(
+                "text-sm px-4 py-1.5 rounded-full whitespace-nowrap",
+                filter === 'tracks' ? "bg-white text-black font-bold hover:scale-105 transition-transform" : "bg-zinc-800 text-muted-foreground hover:bg-zinc-700 hover:text-white font-medium"
+              )}
+            >
+              Tracks
+            </button>
+            <div className="group relative">
+               <button 
+                 disabled 
+                 className="bg-white/10 text-white/50 text-sm font-bold px-4 py-1.5 rounded-full cursor-not-allowed whitespace-nowrap"
+               >
+                 Artists
+               </button>
+               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-xs text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  Coming soon
+               </div>
+            </div>
+            <div className="group relative">
+               <button 
+                 disabled 
+                 className="bg-white/10 text-white/50 text-sm font-bold px-4 py-1.5 rounded-full cursor-not-allowed whitespace-nowrap"
+               >
+                 Albums
+               </button>
+               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-xs text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  Coming soon
+               </div>
+            </div>
+         </div>
+      </PageHeader>
       
       {/* Content */}
       <div className="px-4 py-2">

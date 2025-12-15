@@ -8,7 +8,7 @@ export async function logSearch(payload: {
   spotify_id: string;
   data: any; // visual payload
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return; // Silent fail allowed for logging
 

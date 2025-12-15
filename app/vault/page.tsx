@@ -7,6 +7,7 @@ import { Search, MoreHorizontal, Trophy, Trash2, Play } from "lucide-react";
 import { useVaultTracks } from "@/lib/hooks/useData";
 import { useUIStore } from "@/lib/store";
 import { removeTrackFromVault } from "@/lib/actions/vault";
+import PageHeader from "@/components/PageHeader";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 
@@ -61,21 +62,23 @@ export default function VaultPage() {
     router.push(`/compare?seed=${track.id}`);
   };
 
+
+// ... inside component
+
   return (
     <div className="min-h-full pb-safe">
       
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md pt-4 pb-4 border-b border-white/5">
-        <div className="flex items-center justify-between pt-2">
-           <div className="flex items-center gap-3">
-             <h1 className="text-2xl font-bold tracking-tight text-foreground">Vault</h1>
-             <span className="text-muted-foreground text-sm font-medium mt-1">{loading ? "..." : `${tracks.length} songs`}</span>
-           </div>
-           <Link href="/" className="p-2 hover:bg-white/10 rounded-full transition-colors">
-             <Search size={24} className="text-foreground" />
-           </Link>
-        </div>
-      </div>
+      <PageHeader title="Vault">
+         <div className="flex items-center gap-4 w-full text-sm font-medium text-muted-foreground">
+             <span>{loading ? "..." : `${tracks.length} songs`}</span>
+             {/* Optional Filters */}
+             <div className="flex gap-2 ml-auto overflow-x-auto no-scrollbar">
+               <button className="bg-white/5 hover:bg-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap">Playlists</button>
+               <button className="bg-white/5 hover:bg-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap">Artists</button>
+             </div>
+         </div>
+      </PageHeader>
       
       {/* Content */}
       <div className="px-4 py-2">
