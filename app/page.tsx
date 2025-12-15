@@ -12,6 +12,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import DebugVaultRow from "@/components/debug/DebugVaultRow";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { recordRecentSearch } from "@/lib/actions/recents";
+import ListeningHistory from "@/components/dashboard/ListeningHistory";
 
 interface RecentSearch {
   id: string;
@@ -194,6 +195,8 @@ function SearchContent() {
         {/* Recent State */}
         {!loading && !query && (
            <div className="space-y-6">
+             <ListeningHistory />
+             
              {recentSearches.length > 0 ? (
                <div>
                  <div className="flex items-center justify-between mb-2">

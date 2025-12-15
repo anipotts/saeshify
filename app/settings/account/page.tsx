@@ -50,6 +50,11 @@ export default function AccountPage() {
                   provider: 'spotify',
                   options: {
                     redirectTo: redirectUrl,
+                    scopes: 'user-read-recently-played user-read-currently-playing user-read-playback-state user-read-email user-read-private',
+                    queryParams: {
+                      access_type: 'offline',
+                      prompt: 'consent',
+                    },
                   },
                 });
             }}
