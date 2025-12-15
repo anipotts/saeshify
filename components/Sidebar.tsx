@@ -14,7 +14,7 @@ export default function Sidebar() {
     { name: "Rankings", href: "/rankings", icon: ListOrdered },
   ];
   return (
-    <aside className="hidden md:flex flex-col w-[280px] h-screen fixed left-0 top-0 bg-black p-4 gap-4 z-50">
+    <aside className="hidden md:flex flex-col w-full h-full bg-black p-4 gap-4">
       {/* Top Section: Navigation */}
       <div className="bg-[#121212] rounded-lg p-4 flex flex-col gap-5">
         <Link href="/" className="flex items-center gap-2 px-2">

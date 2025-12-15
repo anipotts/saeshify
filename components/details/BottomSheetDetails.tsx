@@ -1,12 +1,12 @@
-"use client";
-
 import { motion, AnimatePresence } from "framer-motion";
-import { useFocus } from "@/lib/context/FocusContext";
+import { useUIStore } from "@/lib/store";
 import DetailsContent from "./DetailsContent";
 import { useEffect } from "react";
 
 export default function BottomSheetDetails() {
-  const { isDetailsOpen, closeDetails } = useFocus();
+  const { isMobileSheetOpen, closeDetails } = useUIStore();
+  const isDetailsOpen = isMobileSheetOpen; // Mapping for compatibility with existing code if needed, but better to just use isMobileSheetOpen directly
+
 
   // Prevent background scroll when open
   useEffect(() => {

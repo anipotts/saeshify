@@ -27,3 +27,27 @@ body {
   overscroll-behavior: none; /* Point 9: Disable scroll bounce */
   font-family: var(--font-figtree); /* Explicitly set default font */
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar on mobile devices */
+@media (max-width: 768px) {
+  html, body, * {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
+  }
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0px;
+    background: transparent; 
+  }
+}

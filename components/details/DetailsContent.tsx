@@ -1,17 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Plus, Play, X, Trophy, AlertCircle, BarChart2 } from "lucide-react";
-import { useFocus } from "@/lib/context/FocusContext";
+import { useUIStore } from "@/lib/store";
+import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
 
 export default function DetailsContent() {
-  const { focusedEntity, closeDetails } = useFocus();
+  const { focusedEntity, closeDetails } = useUIStore();
   const pathname = usePathname();
+  const router = useRouter();
 
   if (!focusedEntity) return null;
 
-  const { type, data } = focusedEntity;
+  const { kind: type, payload: data } = focusedEntity;
   const isVault = pathname.includes("/vault");
   const isRankings = pathname.includes("/rankings");
 
@@ -28,6 +30,24 @@ export default function DetailsContent() {
     : null;
 
   const year = data.album?.release_date?.split("-")[0] || data.release_date?.split("-")[0];
+
+  const handleAddToVault = async () => {
+    try {
+      await saveTrackToVault(data);
+      // Ideally show toast or close details
+      // closeDetails();
+    } catch(e) { console.error(e); }
+  };
+ 
+  const handleStartRanking = () => {
+    closeDetails();
+    router.push(`/compare?seed=${data.id}`);
+  };
+
+  const handleRemove = async () => {
+    await removeTrackFromVault(data.id);
+    closeDetails();
+  };
 
   return (
     <div className="flex flex-col h-full bg-[#181818] text-white overflow-y-auto no-scrollbar">
@@ -71,7 +91,10 @@ export default function DetailsContent() {
           {/* Default Search Context */}
           {!isVault && !isRankings && (
             <>
-              <button className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2">
+              <button 
+                onClick={type === 'track' ? handleAddToVault : undefined}
+                className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
                 {type === "track" ? (
                   <> <Plus size={20} strokeWidth={2.5} /> Add to Vault </>
                 ) : (
@@ -80,7 +103,10 @@ export default function DetailsContent() {
               </button>
               
               {type === "track" && (
-                <button className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3.5 px-6 rounded-full transition-colors flex items-center justify-center gap-2">
+                <button 
+                  onClick={handleStartRanking}
+                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3.5 px-6 rounded-full transition-colors flex items-center justify-center gap-2"
+                >
                   <Trophy size={18} />
                   Start ranking from this
                 </button>
@@ -91,11 +117,17 @@ export default function DetailsContent() {
           {/* Vault Context */}
           {isVault && (
             <>
-               <button className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2">
+               <button 
+                 onClick={handleStartRanking}
+                 className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+               >
                   <BarChart2 size={20} />
                   Start Ranking
                </button>
-               <button className="w-full bg-white/5 hover:bg-[#E91429]/20 hover:text-[#E91429] text-white font-bold py-3.5 px-6 rounded-full transition-colors flex items-center justify-center gap-2">
+               <button 
+                 onClick={handleRemove}
+                 className="w-full bg-white/5 hover:bg-[#E91429]/20 hover:text-[#E91429] text-white font-bold py-3.5 px-6 rounded-full transition-colors flex items-center justify-center gap-2"
+               >
                   Remove from Vault
                </button>
             </>
