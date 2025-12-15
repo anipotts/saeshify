@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRankings } from "@/lib/hooks/useData";
 import { useUIStore } from "@/lib/store";
 import { Trophy, Info } from "lucide-react";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/ui/PageHeader";
 import clsx from "clsx";
 
 export default function RankingsPage() {

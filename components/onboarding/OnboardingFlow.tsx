@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { isStandalone, hasOnboarded, setOnboarded } from "@/lib/pwa";
+import { isStandalone, hasOnboarded, setOnboarded } from "@/lib/utils/pwa";
 import { Share, PlusSquare, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

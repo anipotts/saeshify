@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUIStore } from "@/lib/store";
 import { saveTrackToVault } from "@/lib/actions/vault";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/ui/PageHeader";
 import DebugVaultRow from "@/components/debug/DebugVaultRow";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 
