@@ -9,6 +9,7 @@ import { useAuthUser } from "@/lib/hooks/useData";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import confetti from "canvas-confetti";
 
 export default function TopBarDesktop() {
   const router = useRouter();
@@ -45,8 +46,21 @@ export default function TopBarDesktop() {
      }
   }, [debouncedQuery]);
 
+// ... (Move to top)
+
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
+    const val = e.target.value;
+    setQuery(val);
+    
+    // Easter Egg
+    if (val.toLowerCase() === "ani" || val.toLowerCase() === "saesha" || val.toLowerCase() === "manan") {
+       confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+       });
+    }
   };
 
   // Close menu on outside click

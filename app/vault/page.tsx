@@ -23,6 +23,26 @@ export default function VaultPage() {
   const { openDetails } = useUIStore();
   const router = useRouter();
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  
+  // Sorting State
+  const [sortBy, setSortBy] = useState<'date' | 'rank' | 'name'>('date');
+
+  // Derive Sorted Tracks
+  const sortedTracks = React.useMemo(() => {
+     if (!tracks) return [];
+     const c = [...tracks];
+     if (sortBy === 'rank') {
+        // High rating first
+        return c.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+     } else if (sortBy === 'name') {
+        return c.sort((a, b) => a.name.localeCompare(b.name));
+     } else {
+        // Date added (assuming list comes in that order or we rely on index/id)
+        // Check if we have 'liked_at' or 'created_at'.
+        // useData seems to sort by 'liked_at' desc by default.
+        return c; // defaulting to fetched order
+     }
+  }, [tracks, sortBy]);
 
   // Close menu on click outside
   React.useEffect(() => {
@@ -39,31 +59,15 @@ export default function VaultPage() {
   const handleRemove = async (id: string) => {
     try {
       await removeTrackFromVault(id);
-      // Data hook should auto-refresh if it uses realtime or we might need to manually trigger refresh
-      // Since useVaultTracks is simple useEffect, we might need to rely on revalidatePath happening on server 
-      // passing down to client via router.refresh() or just optimistic removal.
-      // For now, let's assume server action revalidatePath works or we force reload.
-      // Ideally we would update local state, but tracks comes from hook.
-      // Let's assume revalidate works.
     } catch (e) {
       console.error(e);
     }
   };
 
   const handleStartRanking = (track: any) => {
-    router.push(`/rankings?start_ranking=${track.id}`);
-    // Or compare page. Let's send to Rankings page as requested "Start ranking from this"
-    // Actually typically ranking starts at /compare.
-    // The Rankings Page is for viewing rankings.
-    // I will guess '/compare' is the right place.
-    // The user said "Start ranking from this".
-    // I'll stick to a query param on rankings for now or compare.
-    // Let's use compare.
     router.push(`/compare?seed=${track.id}`);
   };
 
-
-// ... inside component
 
   return (
     <div className="min-h-full pb-safe">
@@ -72,10 +76,26 @@ export default function VaultPage() {
       <PageHeader title="Vault">
          <div className="flex items-center gap-4 w-full text-sm font-medium text-muted-foreground">
              <span>{loading ? "..." : `${tracks.length} songs`}</span>
-             {/* Optional Filters */}
+             {/* Sort Filters */}
              <div className="flex gap-2 ml-auto overflow-x-auto no-scrollbar">
-               <button className="bg-white/5 hover:bg-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap">Playlists</button>
-               <button className="bg-white/5 hover:bg-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap">Artists</button>
+               <button 
+                  onClick={() => setSortBy('date')}
+                  className={clsx("text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap", sortBy === 'date' ? "bg-white text-black" : "bg-white/5 hover:bg-white/10 text-white")}
+               >
+                  Date Added
+               </button>
+               <button 
+                  onClick={() => setSortBy('rank')}
+                  className={clsx("text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap", sortBy === 'rank' ? "bg-white text-black" : "bg-white/5 hover:bg-white/10 text-white")}
+               >
+                  Rank
+               </button>
+               <button 
+                  onClick={() => setSortBy('name')}
+                  className={clsx("text-xs font-medium px-3 py-1.5 rounded-full transition-colors whitespace-nowrap", sortBy === 'name' ? "bg-white text-black" : "bg-white/5 hover:bg-white/10 text-white")}
+               >
+                  Name
+               </button>
              </div>
          </div>
       </PageHeader>
@@ -94,7 +114,7 @@ export default function VaultPage() {
                 </div>
              ))}
           </div>
-        ) : tracks.length === 0 ? (
+        ) : sortedTracks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 opacity-100 space-y-6 text-center">
              <div className="space-y-2">
                <h2 className="text-xl font-bold text-foreground">Vault is empty</h2>
@@ -111,11 +131,12 @@ export default function VaultPage() {
                 <div className="w-8 text-center mr-4">#</div>
                 <div className="flex-1">Title</div>
                 <div className="flex-1">Album</div>
+                <div className="flex-1 text-center">Rank</div>
                 <div className="w-24 text-right pr-8">Duration</div>
                 <div className="w-8"></div>
              </div>
 
-             {tracks.map((track, i) => (
+             {sortedTracks.map((track, i) => (
                <div 
                   key={track.id}
                   onClick={() => openDetails({ kind: 'track', id: track.id, payload: track })}
@@ -142,12 +163,6 @@ export default function VaultPage() {
                         {track.name}
                     </p>
                     <p className="text-[13px] text-muted-foreground truncate leading-snug">
-                        {/* 
-                          Checking if track has array logic or flat fields. 
-                          Assuming view returns 'artist_names' or similar, OR we fallback to text 
-                          Usually views flatten JSON. If normalizeSpotify saves artist_ids, the view might join.
-                          Let's try track.artist_name || "Unknown Artist" 
-                        */}
                         {track.artist_name || (Array.isArray(track.artists) ? track.artists[0]?.name : "Unknown Artist")}
                     </p>
                   </div>
@@ -157,6 +172,11 @@ export default function VaultPage() {
                       <p className="text-[14px] text-muted-foreground truncate hover:text-white transition-colors">
                         {track.album_name || track.album?.name || "Unknown Album"}
                       </p>
+                   </div>
+                   
+                   {/* Rating/Rank (Desktop) */}
+                   <div className="hidden md:block flex-1 text-center text-sm font-variant-numeric tabular-nums text-muted-foreground">
+                      {track.rating ? Math.round(track.rating) : "-"}
                    </div>
                    
                    {/* Duration (Desktop) */}
