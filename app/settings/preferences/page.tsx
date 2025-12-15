@@ -4,6 +4,7 @@ import { Layout, Check, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { getUserPreferences, updateUserPreferences } from "@/lib/actions/preferences";
+import NotificationToggle from "@/components/settings/NotificationToggle";
 
 export default function PreferencesPage() {
   // Local Prefs
@@ -36,6 +37,8 @@ export default function PreferencesPage() {
 
   return (
     <div className="space-y-4">
+       <NotificationToggle />
+
        {/* Local Prefs */}
        <div className="bg-zinc-900 rounded-lg overflow-hidden border border-white/5">
           <div className="p-4 border-b border-white/5 bg-white/5">
