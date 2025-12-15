@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Search, Plus, Check, Clock, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSpotifySearch } from "@/lib/hooks/useSpotify";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUIStore } from "@/lib/store";
 import { saveTrackToVault } from "@/lib/actions/vault";
+import PageHeader from "@/components/PageHeader";
+import DebugVaultRow from "@/components/debug/DebugVaultRow";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 interface RecentSearch {
   id: string;
@@ -17,8 +21,31 @@ interface RecentSearch {
   data: any; // Store full object to re-open
 }
 
-export default function Home() {
+function SearchContent() {
   const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  const debouncedQuery = useDebounce(query, 300);
+
+  // Sync query from URL if changed externally (e.g. by TopBar)
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && q !== query) {
+        setQuery(q);
+    } else if (!q && query) {
+        setQuery(""); // Clear if URL cleared
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Trigger search when debouncedQuery changes
+  useEffect(() => {
+      if (debouncedQuery.length > 2) {
+          search(debouncedQuery, "track,album,artist");
+      }
+  }, [debouncedQuery]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  };
   const { search, results, loading } = useSpotifySearch();
   const { openDetails } = useUIStore();
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
@@ -83,7 +110,15 @@ export default function Home() {
     setAddedTracks(prev => new Set(prev).add(track.id));
 
     try {
-      await saveTrackToVault(track);
+      const result = await saveTrackToVault(track);
+      if (!result.success) {
+          if (result.code === 401) {
+              // Redirect or show toast
+              window.location.href = "/settings/account"; // Force redirect to login
+              return;
+          }
+          throw new Error(result.error);
+      }
     } catch (err) {
       console.error(err);
       // Revert if failed
@@ -92,49 +127,41 @@ export default function Home() {
         next.delete(track.id);
         return next;
       });
+      // Optionally alert user here
+      alert("Failed to save: " + (err as any).message);
     }
   };
 
-  let debounceTimer: NodeJS.Timeout;
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setQuery(val);
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      if (val.length > 2) {
-        search(val, "track,album,artist");
-      }
-    }, 500);
-  };
+
+// ... 
 
   return (
     <div className="min-h-full pb-safe">
       
-      {/* Search Header */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-4 pb-2 w-full">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-4 pt-2">Search</h1>
-        
-        <div className="relative group rounded-md bg-zinc-900 hover:bg-zinc-800 transition-colors h-[48px] flex items-center overflow-hidden border border-white/5">
-          <div className="pl-3 text-muted-foreground">
-             <Search size={20} />
-          </div>
-          <input
-            type="text"
-            value={query}
-            onChange={handleSearch}
-            placeholder="What do you want to play?"
-            className="flex-1 h-full bg-transparent pl-3 pr-4 text-[16px] text-foreground placeholder:text-muted-foreground outline-none font-medium"
-          />
-          {query && (
-            <button onClick={() => setQuery("")} className="pr-3 text-muted-foreground hover:text-white">
-              <X size={16} />
-            </button>
-          )}
-        </div>
-      </div>
+      {/* Unified Header */}
+      <PageHeader title="Search">
+         {/* Mobile Search Input - Hidden on Desktop (md:hidden) because TopBar has it */}
+         <div className="w-full relative group rounded-md bg-zinc-900 hover:bg-zinc-800 transition-colors h-full flex items-center overflow-hidden border border-white/5 md:hidden">
+            <div className="pl-3 text-muted-foreground">
+              <Search size={20} />
+            </div>
+            <input
+              type="text"
+              value={query}
+              onChange={handleSearch}
+              placeholder="What do you want to play?"
+              className="flex-1 h-full bg-transparent pl-3 pr-4 text-[16px] text-foreground placeholder:text-muted-foreground outline-none font-medium"
+            />
+            {query && (
+              <button onClick={() => setQuery("")} className="pr-3 text-muted-foreground hover:text-white">
+                <X size={16} />
+              </button>
+            )}
+         </div>
+      </PageHeader>
 
       {/* Content */}
-      <div className="py-4 min-h-[500px]">
+      <div className="px-4 py-4 min-h-[500px]">
         
         {/* Loading */}
         {loading && (
@@ -191,8 +218,8 @@ export default function Home() {
                </div>
              ) : (
                <div className="flex flex-col items-center justify-center py-32 space-y-4">
-                 <h3 className="text-foreground font-bold text-lg">Play what you love</h3>
-                 <p className="text-sm text-muted-foreground text-center max-w-[250px]">Search for artists, songs, podcasts, and more.</p>
+                 <h3 className="text-foreground font-bold text-lg">Search any song</h3>
+                 <p className="text-sm text-muted-foreground text-center max-w-[250px]">Save and compare your favorite songs</p>
                </div>
              )}
            </div>
@@ -226,6 +253,7 @@ export default function Home() {
                       <div className="flex-1 min-w-0 pr-2">
                         <p className="text-[16px] font-medium text-foreground truncate leading-snug group-hover:text-accent transition-colors">{track.name}</p>
                         <p className="text-[13px] text-muted-foreground truncate leading-snug">{track.artists[0].name}</p>
+                        <DebugVaultRow trackId={track.id} isAdded={isAdded} />
                       </div>
 
                       {/* Explicit Action: Add to Vault */}
@@ -269,7 +297,7 @@ export default function Home() {
                </motion.div>
             )}
 
-             {/* Albums */}
+            {/* Albums */}
             {results.albums?.items?.length > 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
                 <h2 className="text-lg font-bold text-foreground mb-2">Albums</h2>
@@ -301,4 +329,12 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+export default function Home() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <SearchContent />
+        </Suspense>
+    );
 }
