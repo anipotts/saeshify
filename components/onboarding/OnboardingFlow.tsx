@@ -45,7 +45,7 @@ export default function OnboardingFlow() {
               <h1 className="text-4xl font-bold tracking-tight text-[#1DB954]">Saeshify</h1>
               <div className="space-y-2 max-w-xs mx-auto text-neutral-300">
                 <p>Add this to your Home Screen.</p>
-                <p>Then it opens like a real app <br/>(no browser bars).</p>
+                <p>Then it opens like a regular app.</p>
               </div>
             </motion.div>
 

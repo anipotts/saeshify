@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Saeshify",
-  description: "Your Music Bank & Rankings",
+  description: "Spotify for Saesha",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
