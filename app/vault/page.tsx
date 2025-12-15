@@ -118,7 +118,7 @@ export default function VaultPage() {
           <div className="flex flex-col items-center justify-center py-32 opacity-100 space-y-6 text-center">
              <div className="space-y-2">
                <h2 className="text-xl font-bold text-foreground">Vault is empty</h2>
-               <p className="text-sm text-muted-foreground">Search and add songs to start ranking.</p>
+               <p className="text-sm text-muted-foreground">Just like your sex life. Go rate some songs.</p>
              </div>
              <Link href="/" className="bg-white text-black font-bold py-3 px-8 rounded-full text-sm hover:scale-105 transition-transform">
                Find songs

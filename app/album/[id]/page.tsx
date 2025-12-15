@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeft, Check, Plus } from "lucide-react";
+import SpotifyLinkButton from "@/components/ui/SpotifyLinkButton";
 // Removed unused imports
 
 import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
@@ -74,6 +75,7 @@ export default function AlbumPage() {
           <p className="text-neutral-400 font-medium text-sm md:text-lg">
              <span className="text-white hover:underline cursor-pointer">{album.artists[0]?.name}</span> • {album.release_date.split('-')[0]} • {album.total_tracks} songs
           </p>
+          <SpotifyLinkButton type="album" id={album.id} variant="primary" className="mt-6 w-full max-w-[200px]" />
         </div>
       </div>
 

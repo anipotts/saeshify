@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Plus, Play, X, Trophy, AlertCircle, BarChart2 } from "lucide-react";
 import { useUIStore } from "@/lib/store";
 import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
+import SpotifyLinkButton from "@/components/ui/SpotifyLinkButton";
 
 export default function DetailsContent() {
   const { focusedEntity, closeDetails, isDetailsOpen } = useUIStore();
@@ -112,7 +113,7 @@ export default function DetailsContent() {
                     if (type === 'artist') handleNavigationFromDetails(`/artist/${data.id}`);
                     if (type === 'album') handleNavigationFromDetails(`/album/${data.id}`);
                 }}
-                className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                className="w-full h-12 bg-[#1DB954] text-black font-bold text-sm rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
               >
                 {type === "track" ? (
                   <> <Plus size={20} strokeWidth={2.5} /> Add to Vault </>
@@ -124,7 +125,7 @@ export default function DetailsContent() {
               {type === "track" && (
                 <button 
                   onClick={handleStartRanking}
-                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3.5 px-6 rounded-full transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-[#2A2A2A] hover:bg-[#3E3E3E] text-white font-bold text-sm rounded-full transition-colors flex items-center justify-center gap-2"
                 >
                   <Trophy size={18} />
                   Start ranking from this
@@ -138,19 +139,21 @@ export default function DetailsContent() {
             <>
                <button 
                  onClick={handleStartRanking}
-                 className="w-full bg-accent text-black font-bold py-3.5 px-6 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                 className="w-full h-12 bg-[#1DB954] text-black font-bold text-sm rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
                >
                   <BarChart2 size={20} />
                   Start Ranking
                </button>
                <button 
                  onClick={handleRemove}
-                 className="w-full bg-white/5 hover:bg-[#E91429]/20 hover:text-[#E91429] text-white font-bold py-3.5 px-6 rounded-full transition-colors flex items-center justify-center gap-2"
+                 className="w-full h-12 bg-[#2A2A2A] hover:bg-[#E91429]/20 hover:text-[#E91429] text-white font-bold text-sm rounded-full transition-colors flex items-center justify-center gap-2"
                >
                   Remove from Vault
                </button>
             </>
           )}
+          
+          <SpotifyLinkButton type={type as any} id={data.id} variant="outline" className="mt-1 border-[#727272] text-white hover:border-white" />
 
         </div>
 
