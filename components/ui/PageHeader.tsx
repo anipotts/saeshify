@@ -2,6 +2,8 @@
 
 import clsx from "clsx";
 import React from "react";
+import Image from "next/image";
+import { useUIStore } from "@/lib/store";
 
 interface PageHeaderProps {
   title: string;
@@ -23,7 +25,14 @@ export default function PageHeader({ title, children }: PageHeaderProps) {
       "border-b border-[#2A2A2A]" // Divider
     )}>
        {/* Row 1: Title */}
-       <div className="flex items-center h-10 mb-2 pl-16 md:pl-0">
+       <div className="flex items-center h-10 mb-2 gap-3 md:gap-0">
+         {/* Mobile Avatar - Replaces fixed ClientLayout one */}
+         <div 
+            onClick={() => useUIStore.getState().setMobileSettingsOpen(true)}
+            className="md:hidden w-8 h-8 rounded-full overflow-hidden relative border border-white/10 shrink-0 cursor-pointer"
+         >
+            <Image src="/icon-192x192.png" alt="Settings" fill className="object-cover" />
+         </div>
          <h1 className="text-2xl font-bold tracking-tight text-white">{title}</h1>
        </div>
 

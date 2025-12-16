@@ -89,7 +89,7 @@ export default function RankingsPage() {
                <div 
                   key={track.id}
                   onClick={() => openDetails({ kind: 'track', id: track.id, payload: track })}
-                  className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-md hover:bg-white/5 transition-colors cursor-pointer group"
+                  className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-md hover:bg-white/5 transition-colors cursor-pointer group row-micro"
                >
                   {/* Rank # */}
                   <div className={clsx(

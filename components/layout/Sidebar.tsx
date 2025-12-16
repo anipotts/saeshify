@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Library, ListOrdered, Clock, Disc, Mic, Music } from "lucide-react";
+import { Search, LibraryBig, Trophy, Clock, Disc, Mic, Music, Library } from "lucide-react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -81,8 +81,8 @@ export default function Sidebar() {
 
   const navItems = [
     { name: "Search", href: "/", icon: Search },
-    { name: "Vault", href: "/vault", icon: Library },
-    { name: "Rankings", href: "/rankings", icon: ListOrdered },
+    { name: "Library", href: "/library", icon: LibraryBig },
+    { name: "Rankings", href: "/rankings", icon: Trophy },
   ];
 
   return (
@@ -102,7 +102,7 @@ export default function Sidebar() {
                 key={item.name}
                 href={item.href}
                 className={clsx(
-                  "flex items-center gap-4 px-2 py-2 transition-colors duration-200 group",
+                  "flex items-center gap-4 px-2 py-2 group row-micro rounded-md",
                   isActive ? "text-white" : "text-[#B3B3B3] hover:text-white"
                 )}
               >
@@ -143,7 +143,7 @@ export default function Sidebar() {
                 <div 
                    key={item.id + i} // handle duplicates
                    onClick={() => handleItemClick(item)}
-                   className="group flex items-center gap-3 p-2 rounded-md hover:bg-[#1f1f1f] cursor-pointer transition-colors"
+                   className="group flex items-center gap-3 p-2 rounded-md cursor-pointer row-micro text-left"
                 >
                    {/* Image */}
                    <div className="relative w-12 h-12 shrink-0 rounded-md overflow-hidden bg-[#282828]">

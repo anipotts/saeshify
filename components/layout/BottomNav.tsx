@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Library, ListOrdered } from "lucide-react"; // Using ListOrdered as placeholder for Rankings list
+import { Search, LibraryBig, Trophy } from "lucide-react";
 import clsx from "clsx";
 
 export default function BottomNav() {
@@ -10,8 +10,8 @@ export default function BottomNav() {
 
   const navItems = [
     { name: "Search", href: "/", icon: Search },
-    { name: "Vault", href: "/vault", icon: Library },
-    { name: "Rankings", href: "/rankings", icon: ListOrdered },
+    { name: "Library", href: "/library", icon: LibraryBig },
+    { name: "Rankings", href: "/rankings", icon: Trophy },
   ];
 
   return (

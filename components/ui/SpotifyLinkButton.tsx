@@ -47,9 +47,9 @@ export default function SpotifyLinkButton({ type, id, className, variant = 'outl
     <button 
       onClick={handleNavigation}
       className={clsx(
-        "flex items-center justify-center gap-2 w-full h-12 rounded-full font-bold text-sm transition-transform active:scale-95",
-        variant === 'primary' && "bg-[#1DB954] text-black hover:scale-105",
-        variant === 'outline' && "border border-[#727272] text-white hover:border-white hover:bg-white/5",
+        "flex items-center justify-center gap-2 w-full h-12 rounded-full font-bold text-sm btn-micro",
+        variant === 'primary' && "bg-[#1DB954] text-black",
+        variant === 'outline' && "border border-[#727272] text-white hover:border-white",
         className
       )}
     >

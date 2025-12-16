@@ -36,7 +36,7 @@ export default function BottomSheetDetails() {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
             className="fixed bottom-0 left-0 right-0 z-[61] h-[85vh] bg-[#181818] rounded-t-[20px] overflow-hidden md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] border-t border-white/10"
           >
             {/* Drag Handle */}

@@ -26,6 +26,17 @@ const config: Config = {
       fontFamily: {
         sans: ["Figtree", "sans-serif"],
       },
+      transitionTimingFunction: {
+        'standard': 'cubic-bezier(0.2, 0, 0, 1)',
+        'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'out': 'cubic-bezier(0, 0, 0.2, 1)',
+      },
+      transitionDuration: {
+        'micro': '120ms',
+        'small': '200ms',
+        'medium': '300ms',
+        'large': '450ms',
+      },
     },
   },
   plugins: [],
