@@ -36,7 +36,7 @@ export default function MobileSettingsDrawer({ isOpen, onClose }: { isOpen: bool
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={{ left: 0.5, right: 0.05 }}

@@ -18,7 +18,7 @@ function formatDuration(ms: number) {
   return `${minutes}:${Number(seconds) < 10 ? '0' : ''}${seconds}`;
 }
 
-export default function VaultPage() {
+export default function LibraryPage() {
   const { tracks, loading } = useVaultTracks();
   const { openDetails } = useUIStore();
   const router = useRouter();
@@ -37,10 +37,8 @@ export default function VaultPage() {
      } else if (sortBy === 'name') {
         return c.sort((a, b) => a.name.localeCompare(b.name));
      } else {
-        // Date added (assuming list comes in that order or we rely on index/id)
-        // Check if we have 'liked_at' or 'created_at'.
-        // useData seems to sort by 'liked_at' desc by default.
-        return c; // defaulting to fetched order
+        // Date added
+        return c; 
      }
   }, [tracks, sortBy]);
 
@@ -73,7 +71,7 @@ export default function VaultPage() {
     <div className="min-h-full pb-safe">
       
       {/* Header */}
-      <PageHeader title="Vault">
+      <PageHeader title="Library">
          <div className="flex items-center gap-4 w-full text-sm font-medium text-muted-foreground">
              <span>{loading ? "..." : `${tracks.length} songs`}</span>
              {/* Sort Filters */}
@@ -117,7 +115,7 @@ export default function VaultPage() {
         ) : sortedTracks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 opacity-100 space-y-6 text-center">
              <div className="space-y-2">
-               <h2 className="text-xl font-bold text-foreground">Vault is empty</h2>
+               <h2 className="text-xl font-bold text-foreground">Library is empty</h2>
                <p className="text-sm text-muted-foreground">Just like your sex life. Go rate some songs.</p>
              </div>
              <Link href="/" className="bg-white text-black font-bold py-3 px-8 rounded-full text-sm hover:scale-105 transition-transform">
@@ -206,7 +204,7 @@ export default function VaultPage() {
                                 onClick={(e) => { e.stopPropagation(); handleRemove(track.id); setActiveMenuId(null); }}
                                 className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-[#3E3E3E] flex items-center gap-2"
                             >
-                                <Trash2 size={16} /> Remove from vault
+                                <Trash2 size={16} /> Remove from library
                             </button>
                         </div>
                     )}

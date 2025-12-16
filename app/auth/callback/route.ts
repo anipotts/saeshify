@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { syncRecentlyPlayed, syncCurrentlyPlayed } from '@/lib/spotify/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -14,7 +15,9 @@ export async function GET(request: Request) {
     if (!error && data?.session) {
       // Capture Spotify Tokens
       const { session } = data;
-      if (session.provider_token && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (session.provider_token && serviceRoleKey) {
           try {
              // 1. Get Spotify User ID
              const spotifyRes = await fetch('https://api.spotify.com/v1/me', {
@@ -59,6 +62,19 @@ export async function GET(request: Request) {
                  // 4. Upsert
                  if (tokenData.refresh_token) {
                      await adminSupabase.from('spotify_tokens').upsert(tokenData);
+                     
+                     // 5. Initial Sync (Blocking to ensure data on landing)
+                     try {
+                        console.log("Starting initial Spotify sync for", session.user.id);
+                        await Promise.all([
+                            syncRecentlyPlayed(session.user.id),
+                            syncCurrentlyPlayed(session.user.id)
+                        ]);
+                        console.log("Initial Spotify sync complete");
+                     } catch (syncErr) {
+                         console.error("Initial Sync Failed:", syncErr);
+                     }
+
                  } else {
                      console.warn("Spotify Login: Missing refresh token. Ensure 'access_type: offline' and 'prompt: consent' are set.");
                  }

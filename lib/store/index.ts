@@ -22,6 +22,10 @@ interface UIState {
   // Mobile Bottom Sheet
   isMobileSheetOpen: boolean;
   setMobileSheetOpen: (isOpen: boolean) => void;
+
+  // Mobile Settings Drawer
+  isMobileSettingsOpen: boolean;
+  setMobileSettingsOpen: (isOpen: boolean) => void;
   
   // Actions
   openDetails: (entity: FocusedEntity) => void;
@@ -40,6 +44,9 @@ export const useUIStore = create<UIState>((set) => ({
 
   isMobileSheetOpen: false,
   setMobileSheetOpen: (isOpen) => set({ isMobileSheetOpen: isOpen }),
+
+  isMobileSettingsOpen: false,
+  setMobileSettingsOpen: (isOpen) => set({ isMobileSettingsOpen: isOpen }),
 
   openDetails: (entity) => set({ 
     focusedEntity: entity, 

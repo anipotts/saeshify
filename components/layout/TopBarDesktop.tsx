@@ -85,8 +85,8 @@ export default function TopBarDesktop() {
        {/* Left: Favicon (Saeshify Logo) */}
        <div className="flex items-center gap-2 w-[280px]">
           <Link href="/" className="flex items-center gap-2">
-                {/* Using favicon as requested. Next.js serves it at /favicon.ico usually */}
-                <Image src="/favicon.ico" alt="Saeshify" width={36} height={36} className="object-contain" />
+
+                <Image src="/icon-192x192.png" alt="Saeshify" width={36} height={36} className="object-contain" />
           </Link>
           <div className="flex gap-2 ml-4">
              <button onClick={() => router.back()} className="w-8 h-8 rounded-full bg-black/50 items-center justify-center flex hover:bg-[#2A2A2A] text-muted-foreground hover:text-white transition-colors">
