@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, LibraryBig, Trophy, Clock, Disc, Mic, Music, Library } from "lucide-react";
+import { Search, LibraryBig, Trophy, Clock, Disc, Mic, Music, Library, AudioLines } from "lucide-react";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -83,6 +83,7 @@ export default function Sidebar() {
     { name: "Search", href: "/", icon: Search },
     { name: "Library", href: "/library", icon: LibraryBig },
     { name: "Rankings", href: "/rankings", icon: Trophy },
+    { name: "Rhymes", href: "/rhymes", icon: AudioLines },
   ];
 
   return (
