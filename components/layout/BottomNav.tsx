@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, LibraryBig, Trophy } from "lucide-react";
+import { Search, LibraryBig, Trophy, AudioLines } from "lucide-react";
 import clsx from "clsx";
 
 export default function BottomNav() {
@@ -12,6 +12,7 @@ export default function BottomNav() {
     { name: "Search", href: "/", icon: Search },
     { name: "Library", href: "/library", icon: LibraryBig },
     { name: "Rankings", href: "/rankings", icon: Trophy },
+    { name: "Rhymes", href: "/rhymes", icon: AudioLines },
   ];
 
   return (
