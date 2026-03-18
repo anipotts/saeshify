@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import AniPottsHeader from "@/components/ui/AniPottsHeader";
 
 export default function FullScreenLogin() {
   const handleLogin = async () => {
@@ -17,17 +18,7 @@ export default function FullScreenLogin() {
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6">
-      <header className="absolute top-10 left-0 right-0 text-center z-10">
-        <a
-          href="https://instagram.com/anipottsbuilds"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-[#1DB954]/50 hover:text-[#1DB954] transition-colors duration-150"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
-        >
-          ani potts
-        </a>
-      </header>
+      <AniPottsHeader variant="dark" z={110} />
       <div className="flex flex-col items-center space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="w-24 h-24 hidden relative">
              {/* Using favicon as requested/implied for 'center of Saesha' */}
