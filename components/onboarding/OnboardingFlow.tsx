@@ -32,6 +32,17 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[60] bg-neutral-950 flex flex-col p-6 text-white"
       >
+        <header className="absolute top-10 left-0 right-0 text-center z-10">
+          <a
+            href="https://instagram.com/anipottsbuilds"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[#1DB954]/50 hover:text-[#1DB954] transition-colors duration-150"
+            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          >
+            ani potts
+          </a>
+        </header>
         {step === "intro" ? (
           <div className="flex-1 flex flex-col justify-center items-center text-center space-y-4">
             <motion.div 
