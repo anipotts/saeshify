@@ -3,33 +3,48 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Check, Plus } from "lucide-react";
+import { ArrowLeft, Check, Plus, Heart } from "lucide-react";
 import SpotifyLinkButton from "@/components/ui/SpotifyLinkButton";
-// Removed unused imports
 
 import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
+import { saveAlbumToVault, isAlbumInVault } from "@/lib/actions/albumVault";
 
 export default function AlbumPage() {
   const params = useParams();
   const router = useRouter();
   const [album, setAlbum] = useState<any>(null);
-  const [addedTracks, setAddedTracks] = useState<Set<string>>(new Set()); // Ideally fetch existing status too? For now, session-based optimism or we check user_bank if we had time.
-  // Actually, to make it robust "add to vault", we should probably know if it's already there. 
-  // For this MVP step, we will assume "toggle" adds/removes from vault directly.
-  
+  const [addedTracks, setAddedTracks] = useState<Set<string>>(new Set());
+  const [albumInVault, setAlbumInVault] = useState(false);
+  const [savingAlbum, setSavingAlbum] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
        Promise.all([
-           fetch(`/api/spotify/album/${params.id}`).then(res => res.json())
-           // Future: Fetch user's vault status for these tracks to pre-populate 'addedTracks'
-       ]).then(([data]) => {
+           fetch(`/api/spotify/album/${params.id}`).then(res => res.json()),
+           isAlbumInVault(params.id as string)
+       ]).then(([data, inVault]) => {
           setAlbum(data);
+          setAlbumInVault(inVault);
           setLoading(false);
        });
     }
   }, [params.id]);
+
+  const handleSaveAlbum = async () => {
+    if (savingAlbum || !album) return;
+    setSavingAlbum(true);
+    try {
+      const result = await saveAlbumToVault(album);
+      if (result.success) {
+        setAlbumInVault(true);
+      }
+    } catch (err) {
+      console.error("Failed to save album:", err);
+    } finally {
+      setSavingAlbum(false);
+    }
+  };
 
   const handleToggle = async (track: any) => {
       const isAdded = addedTracks.has(track.id);
@@ -75,7 +90,36 @@ export default function AlbumPage() {
           <p className="text-neutral-400 font-medium text-sm md:text-lg">
              <span className="text-white hover:underline cursor-pointer">{album.artists[0]?.name}</span> • {album.release_date.split('-')[0]} • {album.total_tracks} songs
           </p>
-          <SpotifyLinkButton type="album" id={album.id} variant="primary" className="mt-6 w-full max-w-[200px]" />
+          <div className="flex items-center gap-3 mt-6">
+            <button
+              onClick={handleSaveAlbum}
+              disabled={albumInVault || savingAlbum}
+              className={`
+                flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all
+                ${albumInVault
+                  ? 'bg-[#1DB954]/20 text-[#1DB954] cursor-default'
+                  : savingAlbum
+                    ? 'bg-white/10 text-white/50 cursor-wait'
+                    : 'bg-white text-black hover:scale-105'
+                }
+              `}
+            >
+              {albumInVault ? (
+                <>
+                  <Heart size={18} fill="currentColor" />
+                  In Library
+                </>
+              ) : savingAlbum ? (
+                'Saving...'
+              ) : (
+                <>
+                  <Heart size={18} />
+                  Save Album
+                </>
+              )}
+            </button>
+            <SpotifyLinkButton type="album" id={album.id} variant="outline" />
+          </div>
         </div>
       </div>
 
