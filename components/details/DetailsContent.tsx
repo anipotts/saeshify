@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Plus, Play, X, Trophy, AlertCircle, BarChart2 } from "lucide-react";
 import { useUIStore } from "@/lib/store";
 import { saveTrackToVault, removeTrackFromVault } from "@/lib/actions/vault";
+import { saveAlbumToVault, removeAlbumFromVault } from "@/lib/actions/albumVault";
 import SpotifyLinkButton from "@/components/ui/SpotifyLinkButton";
 
 export default function DetailsContent() {
@@ -29,11 +30,11 @@ export default function DetailsContent() {
   const isVault = pathname.includes("/vault");
   const isRankings = pathname.includes("/rankings");
 
-  // Track helpers
-  const image = data.album?.images?.[0]?.url || data.images?.[0]?.url;
+  // Image helpers — albums from rankings have cover_url, search results have images array
+  const image = data.cover_url || data.album?.images?.[0]?.url || data.images?.[0]?.url;
   const title = data.name;
-  const subtitle = type === "track" ? data.artists?.[0]?.name : 
-                   type === "album" ? data.artists?.[0]?.name : 
+  const subtitle = type === "track" ? (data.artist_name || data.artists?.[0]?.name) :
+                   type === "album" ? (data.artist_name || data.artists?.[0]?.name) :
                    "Artist";
   
   // Format duration (ms -> m:ss)
@@ -45,24 +46,35 @@ export default function DetailsContent() {
 
   const handleAddToVault = async () => {
     try {
-      const result = await saveTrackToVault(data);
-      if (!result.success) {
-         if (result.code === 401) window.location.href = "/settings/account";
-         else alert("Error: " + result.error);
+      if (type === 'album') {
+        const result = await saveAlbumToVault(data);
+        if (!result.success) {
+          if (result.code === 401) window.location.href = "/settings/account";
+        }
       } else {
-        // closeDetails();
-        // Maybe show checkmark?
+        const result = await saveTrackToVault(data);
+        if (!result.success) {
+          if (result.code === 401) window.location.href = "/settings/account";
+        }
       }
     } catch(e) { console.error(e); }
   };
- 
+
   const handleStartRanking = () => {
     closeDetails();
-    router.push(`/compare?seed=${data.id}`);
+    if (type === 'album') {
+      router.push(`/compare/albums?seed=${data.id}`);
+    } else {
+      router.push(`/compare?seed=${data.id}`);
+    }
   };
 
   const handleRemove = async () => {
-    await removeTrackFromVault(data.id);
+    if (type === 'album') {
+      await removeAlbumFromVault(data.id);
+    } else {
+      await removeTrackFromVault(data.id);
+    }
     closeDetails();
   };
 
@@ -108,22 +120,21 @@ export default function DetailsContent() {
           {/* Default Search Context */}
           {!isVault && !isRankings && (
             <>
-              <button 
-                onClick={type === 'track' ? handleAddToVault : () => {
+              <button
+                onClick={(type === 'track' || type === 'album') ? handleAddToVault : () => {
                     if (type === 'artist') handleNavigationFromDetails(`/artist/${data.id}`);
-                    if (type === 'album') handleNavigationFromDetails(`/album/${data.id}`);
                 }}
                 className="w-full h-12 bg-[#1DB954] text-black font-bold text-sm rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
               >
-                {type === "track" ? (
+                {type === "track" || type === "album" ? (
                   <> <Plus size={20} strokeWidth={2.5} /> Add to Vault </>
                 ) : (
                   <> View {type} </>
                 )}
               </button>
-              
-              {type === "track" && (
-                <button 
+
+              {(type === "track" || type === "album") && (
+                <button
                   onClick={handleStartRanking}
                   className="w-full h-12 bg-[#2A2A2A] hover:bg-[#3E3E3E] text-white font-bold text-sm rounded-full transition-colors flex items-center justify-center gap-2"
                 >
@@ -131,6 +142,19 @@ export default function DetailsContent() {
                   Start ranking from this
                 </button>
               )}
+            </>
+          )}
+
+          {/* Rankings Context */}
+          {isRankings && (type === "track" || type === "album") && (
+            <>
+              <button
+                onClick={handleStartRanking}
+                className="w-full h-12 bg-[#1DB954] text-black font-bold text-sm rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                <BarChart2 size={20} />
+                Start Ranking
+              </button>
             </>
           )}
 
