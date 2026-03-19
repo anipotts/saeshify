@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import AniPottsHeader from "@/components/ui/AniPottsHeader";
 
 export default function FullScreenLogin() {
   const handleLogin = async () => {
@@ -18,7 +17,8 @@ export default function FullScreenLogin() {
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6">
-      <AniPottsHeader variant="dark" z={110} />
+      {/* @ts-expect-error web component */}
+      <ani-potts-header variant="dark" z="110" />
       <div className="flex flex-col items-center space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="w-24 h-24 hidden relative">
              {/* Using favicon as requested/implied for 'center of Saesha' */}

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { isStandalone, hasOnboarded, setOnboarded } from "@/lib/utils/pwa";
 import { Share, PlusSquare, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import AniPottsHeader from "@/components/ui/AniPottsHeader";
 
 export default function OnboardingFlow({ onComplete }: { onComplete?: () => void }) {
   // Initialize directly from localStorage to avoid flash
@@ -33,7 +32,8 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[60] bg-neutral-950 flex flex-col p-6 text-white"
       >
-        <AniPottsHeader variant="dark" z={70} />
+        {/* @ts-expect-error web component */}
+        <ani-potts-header variant="dark" z="70" />
         {step === "intro" ? (
           <div className="flex-1 flex flex-col justify-center items-center text-center space-y-4">
             <motion.div 

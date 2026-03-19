@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import ClientLayout from "@/components/layout/ClientLayout";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         <ClientLayout>
           {children}
         </ClientLayout>
+        <Script src="https://anipotts.com/brand/header.js" strategy="lazyOnload" />
       </body>
     </html>
   );
