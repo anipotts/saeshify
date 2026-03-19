@@ -13,7 +13,15 @@
   --foreground: #FFFFFF;
   --muted: #B3B3B3;
   --accent: #1DB954;
-  
+
+  /* Spotify Brand Colors */
+  --spotify-green: #1DB954;
+  --spotify-black: #191414;
+  --spotify-white: #FFFFFF;
+  --spotify-gray-dark: #212121;
+  --spotify-gray: #535353;
+  --spotify-gray-light: #B3B3B3;
+
   /* Safe Area Variables */
   --sat: env(safe-area-inset-top);
   --sar: env(safe-area-inset-right);
