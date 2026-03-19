@@ -25,3 +25,22 @@ export interface VoteResult {
   winnerNewRating: number;
   loserNewRating: number;
 }
+
+// Album Types
+export interface RankedAlbum {
+  id: string; // Spotify Album ID
+  name: string;
+  artist_ids?: string[];
+  artist_name?: string; // Denormalized for display
+  cover_url: string | null;
+  rating: number;
+  games: number;
+  comparisons_count?: number;
+  liked_at?: string;
+}
+
+export interface AlbumMatchup {
+  id: string; // pairKey (min:max)
+  albumA: RankedAlbum;
+  albumB: RankedAlbum;
+}
