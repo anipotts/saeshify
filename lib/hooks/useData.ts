@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getNextMatchup } from "@/lib/ranking/matchmaking";
 
 // --- AUTH HOOK ---
-import { RankedTrack } from "@/lib/ranking/types";
+import { RankedTrack, RankedAlbum } from "@/lib/ranking/types";
 
 // ... (previous imports)
 
@@ -140,4 +140,112 @@ export function useRankings() {
    }, [userId]);
 
    return { tracks, loading };
+}
+
+
+// --- ALBUM VAULT HOOK ---
+export function useVaultAlbums() {
+  const [albums, setAlbums] = useState<RankedAlbum[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      if (data.user) setUserId(data.user.id);
+    });
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const fetchVault = async () => {
+      const { data, error } = await supabase
+        .from("v_vault_albums")
+        .select("*")
+        .order("liked_at", { ascending: false });
+
+      if (!error && data) setAlbums(data as any as RankedAlbum[]);
+      setLoading(false);
+    };
+
+    fetchVault();
+
+    if (!userId) return;
+
+    const channel = supabase.channel('album_vault_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_album_bank',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          console.log("Realtime Album Vault Update:", payload);
+          fetchVault();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+  return { albums, loading };
+}
+
+
+// --- ALBUM RANKINGS HOOK ---
+export function useAlbumRankings() {
+  const [albums, setAlbums] = useState<RankedAlbum[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      if (data.user) setUserId(data.user.id);
+    });
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const fetchRankings = async () => {
+      const { data, error } = await supabase
+        .from("v_vault_albums")
+        .select("*")
+        .order("rating", { ascending: false }); // Elo Sort
+
+      if (!error && data) setAlbums(data as any as RankedAlbum[]);
+      setLoading(false);
+    };
+
+    fetchRankings();
+
+    if (!userId) return;
+
+    const channel = supabase.channel('album_rankings_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'album_ratings',
+          filter: `user_id=eq.${userId}`
+        },
+        (payload) => {
+          fetchRankings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+
+  }, [userId]);
+
+  return { albums, loading };
 }
