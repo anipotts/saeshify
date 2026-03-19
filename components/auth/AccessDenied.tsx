@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import AniPottsHeader from "@/components/ui/AniPottsHeader";
 
 export default function AccessDenied() {
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 text-center">
-      <AniPottsHeader variant="dark" z={110} />
+      {/* @ts-expect-error web component */}
+      <ani-potts-header variant="dark" z="110" />
       <div className="flex flex-col items-center space-y-6 animate-in fade-in zoom-in duration-500 max-w-md">
         <div className="w-16 h-16 relative opacity-50 grayscale">
              <Image src="/icon-192x192.png" alt="Saeshify" fill className="object-contain" />
