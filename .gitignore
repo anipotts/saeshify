@@ -33,8 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# vercel
+# vercel (legacy, project migrating off Vercel)
 .vercel
+
+# Cloudflare Workers + OpenNext
+.open-next/
+.wrangler/
 
 # typescript
 *.tsbuildinfo
