@@ -18,7 +18,8 @@ const ADAPTERS: Record<AnalysisAdapterKind, (track: TrackIdentity) => Promise<An
 };
 
 export async function analyzeTrack({ track, requestedAdapters = ["fixture", "lrclib", "local-worker"] }: AnalyzeTrackInput): Promise<TrackAnalysis> {
-  const cached = getCachedAnalysis(track.spotifyTrackId);
+  const sourceVersion = analysisSourceVersion(track);
+  const cached = getCachedAnalysis(track.spotifyTrackId, sourceVersion);
   if (cached) return cached;
 
   const settled = await Promise.allSettled(
@@ -63,7 +64,7 @@ export async function analyzeTrack({ track, requestedAdapters = ["fixture", "lrc
     provenance: {
       generatedAt: new Date().toISOString(),
       pipelineVersion: pipelineVersion(),
-      cacheKey: analysisCacheKey(best.track.spotifyTrackId)
+      cacheKey: analysisCacheKey(best.track.spotifyTrackId, analysisSourceVersion(best.track))
     },
     quality: {
       score: scoreCandidate(best),
@@ -76,3 +77,17 @@ export async function analyzeTrack({ track, requestedAdapters = ["fixture", "lrc
   return analysis;
 }
 
+function analysisSourceVersion(track: TrackIdentity) {
+  const lrc = "lrc" in track && typeof track.lrc === "string" ? track.lrc : "";
+  if (!lrc) return "default";
+  return `inline-lrc-${fastHash(lrc)}`;
+}
+
+function fastHash(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}

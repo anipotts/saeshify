@@ -5,6 +5,10 @@ import { parseLrc } from "./lrc";
 import { scoreCandidate } from "../scoring";
 
 export async function fixtureAdapter(track: TrackIdentity): Promise<AnalysisCandidate> {
+  if (hasInlineLrc(track)) {
+    return fixtureCandidate(track, track);
+  }
+
   const fixture =
     fixtureTracks.find((candidate) => candidate.spotifyTrackId === track.spotifyTrackId) ||
     fixtureTracks[0];
@@ -51,3 +55,6 @@ async function fixtureCandidate(fixture: FixtureTrack, track: TrackIdentity): Pr
   };
 }
 
+function hasInlineLrc(track: TrackIdentity): track is FixtureTrack {
+  return "lrc" in track && typeof track.lrc === "string" && track.lrc.trim().length > 0;
+}

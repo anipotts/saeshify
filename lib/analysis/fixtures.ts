@@ -6,6 +6,7 @@ export interface FixtureTrack extends TrackIdentity {
   bankNote?: string;
   accent?: string;
   localAudioUrl?: string;
+  lrcUrl?: string;
 }
 
 export const fixtureTracks: FixtureTrack[] = [

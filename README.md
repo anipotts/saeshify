@@ -26,6 +26,15 @@ open `http://localhost:3000/instrument`.
 
 without spotify credentials, the app runs fixture mode. with spotify credentials, it can poll your active spotify playback from any device signed into the same account.
 
+## private local song bank
+
+drop ignored demo assets under `public/local-media/` and add a local
+`manifest.json` to make real private tracks appear ahead of the public fixtures in
+`/instrument`.
+
+see `docs/local-private-bank.md` for the manifest and `.lrc` format. do not commit
+full-song lyrics or audio.
+
 ## private spotify mode
 
 set these in `.env.local`:
@@ -54,4 +63,3 @@ wrangler deploy --dry-run
 ```
 
 dns migration notes live in `docs/cloudflare-cutover.md`. do not flip `saeshify.com` nameservers or deploy to the live domain without explicit sign-off.
-

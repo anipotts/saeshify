@@ -12,7 +12,12 @@ const requestSchema = z.object({
       artist: z.string(),
       album: z.string().optional(),
       durationMs: z.number().optional(),
-      artworkUrl: z.string().optional()
+      artworkUrl: z.string().optional(),
+      lrc: z.string().optional(),
+      bankLabel: z.string().optional(),
+      bankNote: z.string().optional(),
+      localAudioUrl: z.string().optional(),
+      lrcUrl: z.string().optional()
     })
     .optional(),
   requestedAdapters: z.array(z.enum(["fixture", "lrclib", "local-worker"])).optional()
@@ -42,4 +47,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json(analysis);
 }
-

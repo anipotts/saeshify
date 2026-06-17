@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "local:worker": "tsx local-worker/server.ts",
     "local:demo": "concurrently -n app,worker -c cyan,magenta \"npm run dev\" \"npm run local:worker\"",
-    "cf:build": "next build --webpack && opennextjs-cloudflare build",
+    "cf:build": "next build --webpack && opennextjs-cloudflare build && node scripts/strip-local-media.mjs",
     "cf:preview": "wrangler dev",
     "cf:deploy": "npm run cf:build && wrangler deploy"
   },
