@@ -153,8 +153,24 @@ export default function InstrumentClient() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-4 px-3 py-3 sm:px-5 sm:py-5 lg:grid-cols-[320px_1fr]">
-        <aside className="order-2 space-y-4 lg:order-1">
+      <section className="mx-auto grid max-w-[1440px] gap-4 px-3 py-3 sm:px-5 sm:py-5">
+        <section className="order-1 min-w-0 rounded-md border border-black bg-[#d7dde2] p-2 sm:p-3">
+          <div className="mb-3 flex items-center justify-between rounded-sm bg-black px-3 py-3 text-white sm:px-4">
+            <span className="truncate pr-3 text-sm font-black uppercase">
+              {analysis?.track.artist || "saeshify"} - {analysis?.track.title || "loading"}
+            </span>
+            <span className="mono shrink-0 text-xs text-white/60">{Math.round(displayMs / 1000)}s</span>
+          </div>
+          {analysis ? (
+            <RhymeCanvas analysis={analysis} currentMs={displayMs} inspect={inspect} />
+          ) : (
+            <div className="flex min-h-[520px] items-center justify-center text-sm text-[var(--muted)]">
+              loading analysis
+            </div>
+          )}
+        </section>
+
+        <aside className="order-2 grid gap-4 md:grid-cols-2 xl:grid-cols-[1.15fr_1fr_1fr_auto]">
           <PlaybackPanel analysis={analysis} snapshot={snapshot} isLoading={isLoading} />
           <div className="rounded-md border border-[var(--line)] bg-white p-4">
             <div className="mb-3 flex items-center gap-2 text-sm font-black">
@@ -178,27 +194,11 @@ export default function InstrumentClient() {
           <button
             type="button"
             onClick={() => loadAnalysis()}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-black text-sm font-semibold text-white"
+            className="flex h-full min-h-11 w-full items-center justify-center gap-2 rounded-md bg-black px-4 text-sm font-semibold text-white md:col-span-2 xl:col-span-1"
           >
             <RefreshCw size={16} /> reload fixture
           </button>
         </aside>
-
-        <section className="order-1 min-w-0 rounded-md border border-black bg-[#d7dde2] p-2 sm:p-3 lg:order-2">
-          <div className="mb-3 flex items-center justify-between rounded-sm bg-black px-4 py-3 text-white">
-            <span className="text-sm font-black uppercase">
-              {analysis?.track.artist || "saeshify"} - {analysis?.track.title || "loading"}
-            </span>
-            <span className="mono text-xs text-white/60">{Math.round(displayMs / 1000)}s</span>
-          </div>
-          {analysis ? (
-            <RhymeCanvas analysis={analysis} currentMs={displayMs} inspect={inspect} />
-          ) : (
-            <div className="flex min-h-[520px] items-center justify-center text-sm text-[var(--muted)]">
-              loading analysis
-            </div>
-          )}
-        </section>
       </section>
     </main>
   );

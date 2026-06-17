@@ -1,6 +1,6 @@
 import type { TrackAnalysis } from "./types";
 
-const VERSION = "rebuild-v1";
+const VERSION = "rebuild-v2";
 const memoryCache = new Map<string, TrackAnalysis>();
 
 export function analysisCacheKey(trackId: string) {
@@ -18,4 +18,3 @@ export function setCachedAnalysis(analysis: TrackAnalysis) {
 export function pipelineVersion() {
   return VERSION;
 }
-

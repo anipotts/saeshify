@@ -10,13 +10,13 @@ export const fixtureTracks: FixtureTrack[] = [
     title: "demo cypher",
     artist: "saeshify",
     durationMs: 32000,
-    lrc: `[00:00.00] tap the clock and let the light land here
-[00:03.20] every bright line finds the right-side air
-[00:06.40] quiet bars wake when the vowels flare
-[00:09.90] close range colors ride the same square
-[00:13.20] backend clocks keep the live line tight
-[00:16.80] word tails glow when vowels align
-[00:20.30] private mode maps what speakers dial
-[00:24.00] no copied verse lives in public files`
+    lrc: `[00:00.00] ayo I keep the meter right here
+[00:03.20] low light bends into the night air
+[00:06.40] close range drums land in a bright glare
+[00:09.90] tight snares crack through the square air
+[00:13.20] backend clocks track every live line
+[00:16.80] word tails align on the right time
+[00:20.30] private mode listens as the vowels climb
+[00:24.00] public files only keep the demo rhyme`
   }
 ];

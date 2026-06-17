@@ -1,7 +1,7 @@
 import type { AnalysisCandidate, AnalysisLine, AnalysisWord, RhymeFamily } from "@/lib/analysis/types";
 import { normalizeWord, phonemesForWord, rhymeTail, vowelNucleus } from "./phonetics";
 
-const COLORS = ["#ff4b3e", "#d95cff", "#26d9d0", "#ffcc33", "#35d06f", "#ff7ab6", "#58a6ff", "#f38a2f"];
+const COLORS = ["#a7adb3", "#9ca3af", "#ef2f2f", "#d95cff", "#8f969b", "#26d9d0", "#26d9d0", "#ff7ab6"];
 
 export function detectDenseRhymes(candidate: AnalysisCandidate): {
   words: AnalysisWord[];
@@ -85,4 +85,3 @@ function createFamily(index: number, kind: RhymeFamily["kind"], tail: string, wo
     confidence
   };
 }
-
