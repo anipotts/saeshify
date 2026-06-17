@@ -70,13 +70,27 @@ input {
 }
 
 .karaoke-word {
+  --karaoke-fill: rgb(30 215 96 / 0.28);
+  display: inline-block;
+  margin-block: 2px;
+  line-height: 1.06;
+  vertical-align: baseline;
   background-image:
-    linear-gradient(90deg, rgb(30 215 96 / 0.28) var(--karaoke-progress-pct, 0%), transparent 0),
+    linear-gradient(90deg, var(--karaoke-fill) var(--karaoke-progress-pct, 0%), transparent 0),
     linear-gradient(var(--token-bg), var(--token-bg));
   background-repeat: no-repeat;
   background-size: 100% 100%, 100% 100%;
+  transition:
+    color 120ms linear,
+    background-color 120ms linear,
+    background-image 120ms linear,
+    box-shadow 120ms linear;
 }
 
 .karaoke-word.is-active {
-  box-shadow: inset 0 -0.08em 0 var(--spotify);
+  box-shadow: inset 0 -0.075em 0 rgb(0 0 0 / 0.42);
+}
+
+.karaoke-word[data-ghost="true"] {
+  text-shadow: 0 0 0.01em rgb(17 17 17 / 0.16);
 }

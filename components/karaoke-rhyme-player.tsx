@@ -32,7 +32,7 @@ export default function KaraokeRhymePlayer({
     const node = activeLine ? lineRefs.current[activeLine.id] : null;
     if (!container || !node) return;
 
-    const focusY = compact ? container.clientHeight * 0.2 : container.clientHeight * 0.24;
+    const focusY = compact ? container.clientHeight * 0.26 : container.clientHeight * 0.34;
     const containerBox = container.getBoundingClientRect();
     const nodeBox = node.getBoundingClientRect();
     container.scrollTo({
@@ -62,7 +62,6 @@ export default function KaraokeRhymePlayer({
             const words = line.wordIds.map((wordId) => wordById.get(wordId)).filter(Boolean) as AnalysisWord[];
             const active = index === activeLineIndex;
             const past = currentMs > line.endMs + 200;
-            const revealed = currentMs >= line.startMs - 300;
 
             return (
               <section
@@ -73,13 +72,13 @@ export default function KaraokeRhymePlayer({
                 className={clsx(
                   "transition-opacity duration-300",
                   index > 0 && index % 4 === 0 ? "pt-5 sm:pt-7" : "pt-1",
-                  active ? "opacity-100" : past ? "opacity-92" : "opacity-46"
+                  active ? "opacity-100" : past ? "opacity-92" : "opacity-78"
                 )}
                 aria-label={`bar ${index + 1}`}
               >
                 <p
                   className={clsx(
-                    "m-0 w-full max-w-full whitespace-normal font-normal leading-[1.2] tracking-normal text-black sm:max-w-[22em]",
+                    "m-0 w-full max-w-full whitespace-normal font-normal leading-[1.31] tracking-normal text-black sm:max-w-[22em]",
                     compact ? "text-[23px] sm:text-[30px]" : "text-[23px] sm:text-[31px] xl:text-[35px]"
                   )}
                 >
@@ -89,7 +88,6 @@ export default function KaraokeRhymePlayer({
                       active={word.id === activeWordId}
                       currentMs={currentMs}
                       family={displayFamilyByWordId.get(word.id) || null}
-                      revealed={revealed}
                       word={word}
                       wordIndex={wordIndex}
                     />
@@ -108,20 +106,22 @@ function TimedWord({
   active,
   currentMs,
   family,
-  revealed,
   word,
   wordIndex
 }: {
   active: boolean;
   currentMs: number;
   family: RhymeFamily | null;
-  revealed: boolean;
   word: AnalysisWord;
   wordIndex: number;
 }) {
+  const reached = currentMs >= word.startMs - 35;
   const passed = currentMs >= word.endMs;
   const progress = active ? Math.min(Math.max((currentMs - word.startMs) / Math.max(word.endMs - word.startMs, 1), 0), 1) : 0;
-  const background = family && revealed ? `${family.color}${family.confidence >= 0.85 ? "e8" : "a6"}` : "transparent";
+  const familyFill = family ? `${family.color}${family.confidence >= 0.85 ? "e8" : "a6"}` : "transparent";
+  const background = family && reached ? familyFill : "transparent";
+  const karaokeFill = family && reached ? `${family.color}${family.confidence >= 0.85 ? "f2" : "cc"}` : "rgb(30 215 96 / 0.34)";
+  const textColor = reached ? "#111111" : "rgb(17 17 17 / 0.32)";
   const title = family ? `${family.kind} / ${family.tail} / ${Math.round(family.confidence * 100)}%` : word.text;
 
   return (
@@ -130,16 +130,18 @@ function TimedWord({
       <span
         className={clsx(
           "karaoke-word rhyme-token relative box-decoration-clone rounded-[2px] px-[0.08em] py-[0.01em]",
-          family && revealed && "font-medium",
+          family && reached && "font-medium",
           active && "is-active"
         )}
         data-active={active || undefined}
+        data-ghost={!reached || undefined}
         data-passed={passed || undefined}
         style={
           {
             "--token-bg": background,
-            "--token-color": "#111111",
+            "--token-color": textColor,
             "--token-outline": "transparent",
+            "--karaoke-fill": karaokeFill,
             "--karaoke-progress-pct": `${Math.round(progress * 100)}%`
           } as CSSProperties
         }

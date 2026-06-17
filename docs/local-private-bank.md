@@ -40,6 +40,12 @@ public/local-media/
 urls can be bare filenames or `/local-media/...` paths. the app keeps them inside
 `/local-media/`.
 
+for the 10-track mf doom private demo scaffold, copy
+`docs/mf-doom-local-bank.template.json` to `public/local-media/manifest.json`,
+then place legally supplied audio and matching `.lrc` files next to it. the
+template is metadata only; it intentionally contains no copyrighted audio or full
+lyrics.
+
 ## lrc format
 
 use one timestamped line per bar or short lyric line:
@@ -48,6 +54,15 @@ use one timestamped line per bar or short lyric line:
 [00:00.00] first timed lyric line here
 [00:03.20] next timed lyric line here
 [00:06.80] another timed line here
+```
+
+for spited-style playback, use enhanced word timestamps inside each bar. the line
+timestamp controls bar layout and scroll position; each `<mm:ss.xx>` tag controls
+the exact word reveal:
+
+```text
+[00:06.00]<00:06.00>first <00:06.32>timed <00:06.68>word <00:07.04>run
+[00:08.20]<00:08.20>next <00:08.54>bar <00:08.91>lands <00:09.22>clean
 ```
 
 the client fetches the local `.lrc`, sends it to the local analyzer route, computes
