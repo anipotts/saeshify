@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+.playwright-mcp/
 
 # next.js
 /.next/
@@ -47,5 +48,8 @@ next-env.d.ts
 .next/
 node_modules/
 
-CLAUDE.md
+CLAUDE.local.md
 
+_archive/
+.data/
+.dev.vars

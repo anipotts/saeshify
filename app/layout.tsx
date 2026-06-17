@@ -1,58 +1,40 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ClientLayout from "@/components/layout/ClientLayout";
 
-export const viewport: Viewport = {
-  themeColor: "#121212",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false, 
-  viewportFit: "cover",
-};
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"]
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"]
+});
 
 export const metadata: Metadata = {
-  title: "Saeshify",
-  description: "Spotify for Saesha",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Saeshify",
-  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://saeshify.com"),
+  title: "saeshify",
+  description: "live rhyme instrumentation for spotify playback",
   openGraph: {
-    title: "Saeshify",
-    description: "Spotify for Saesha",
-    images: [
-      {
-        url: "/saeshify-banner.png",
-        width: 1200,
-        height: 630,
-        alt: "Saeshify",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/saeshify-banner.png"],
-  },
+    title: "saeshify",
+    description: "live rhyme instrumentation for spotify playback",
+    url: "https://saeshify.com",
+    siteName: "saeshify"
+  }
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#f2f0eb"
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <head />
-      <body className="font-sans antialiased bg-background text-foreground selection:bg-accent selection:text-black overflow-x-hidden">
-        <ClientLayout>
-          {children}
-        </ClientLayout>
-        <Script src="https://anipotts.com/brand/header.js" strategy="lazyOnload" />
-      </body>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
     </html>
   );
 }
+

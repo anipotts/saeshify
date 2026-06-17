@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "saeshify",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-06-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "account_id": "0f856093bdcd34a7da1bde5ee4385163",
+  "workers_dev": true,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+  // Custom domains are enabled after the Cloudflare zone exists:
+  // "routes": [
+  //   { "pattern": "saeshify.com", "custom_domain": true, "zone_id": "<zone_id>" },
+  //   { "pattern": "www.saeshify.com", "custom_domain": true, "zone_id": "<zone_id>" }
+  // ]
+}
+
