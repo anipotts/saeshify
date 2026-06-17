@@ -61,6 +61,10 @@ export function phonemesForWord(word: string) {
   if (!normalized) return [];
   if (DICTIONARY[normalized]) return DICTIONARY[normalized];
 
+  if (normalized.endsWith("ail") || normalized.endsWith("ale")) return ["EY", "L"];
+  if (normalized.endsWith("air") || normalized.endsWith("are")) return ["EH", "R"];
+  if (normalized.endsWith("ear") || normalized.endsWith("eer")) return ["IH", "R"];
+  if (normalized.endsWith("een") || normalized.endsWith("ene")) return ["IY", "N"];
   if (normalized.endsWith("ight")) return ["AY", "T"];
   if (normalized.endsWith("and")) return ["AE", "N", "D"];
   if (normalized.endsWith("ine")) return ["AY", "N"];
@@ -68,6 +72,8 @@ export function phonemesForWord(word: string) {
   if (normalized.endsWith("ow")) return ["OW"];
   if (normalized.endsWith("old")) return ["OW", "L", "D"];
   if (normalized.endsWith("ode")) return ["OW", "D"];
+  if (normalized.endsWith("one") || normalized.endsWith("own")) return ["OW", "N"];
+  if (normalized.endsWith("ound")) return ["AW", "N", "D"];
   if (normalized.endsWith("ing")) return ["IH", "NG"];
 
   return approximateLetters(normalized);

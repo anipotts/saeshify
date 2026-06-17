@@ -9,6 +9,7 @@
   --line: #cbd3dc;
   --black: #050505;
   --green: #18a957;
+  --spotify: #1ed760;
 }
 
 * {
@@ -48,4 +49,34 @@ input {
   background: var(--token-bg);
   color: var(--token-color);
   box-shadow: 0 0 0 1px var(--token-outline);
+}
+
+.karaoke-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(30 215 96 / 0.6) transparent;
+}
+
+.karaoke-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.karaoke-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.karaoke-scroll::-webkit-scrollbar-thumb {
+  background: rgb(30 215 96 / 0.55);
+  border-radius: 999px;
+}
+
+.karaoke-word {
+  background-image:
+    linear-gradient(90deg, rgb(30 215 96 / 0.28) var(--karaoke-progress-pct, 0%), transparent 0),
+    linear-gradient(var(--token-bg), var(--token-bg));
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 100%;
+}
+
+.karaoke-word.is-active {
+  box-shadow: inset 0 -0.08em 0 var(--spotify);
 }

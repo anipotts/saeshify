@@ -1,7 +1,7 @@
 import type { AnalysisCandidate, AnalysisLine, AnalysisWord, RhymeFamily } from "@/lib/analysis/types";
 import { normalizeWord, phonemesForWord, rhymeTail, vowelNucleus } from "./phonetics";
 
-const COLORS = ["#a7adb3", "#9ca3af", "#ef2f2f", "#d95cff", "#8f969b", "#26d9d0", "#26d9d0", "#ff7ab6"];
+const COLORS = ["#ef2f2f", "#d95cff", "#26d9d0", "#f0d232", "#1ed760", "#a7adb3", "#58a6ff", "#f38a2f"];
 
 export function detectDenseRhymes(candidate: AnalysisCandidate): {
   words: AnalysisWord[];
