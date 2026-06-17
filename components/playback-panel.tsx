@@ -21,7 +21,7 @@ export default function PlaybackPanel({
         <p className="text-sm text-[var(--muted)]">{analysis?.track.artist || "fixture"}</p>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-        <Readout label="state" value={snapshot?.isPlaying ? "playing" : isLoading ? "loading" : "paused/demo"} />
+        <Readout label="state" value={snapshot?.isPlaying ? "playing" : isLoading ? "loading" : "demo loop"} />
         <Readout label="source" value={snapshot?.source || analysis?.quality.bestSource || "fixture"} />
         <Readout label="device" value={snapshot?.device?.name || "local"} />
         <Readout label="duration" value={`${Math.round((analysis?.track.durationMs || 0) / 1000)}s`} />
@@ -38,4 +38,3 @@ function Readout({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-

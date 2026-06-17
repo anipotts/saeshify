@@ -70,8 +70,8 @@ export default async function HomePage() {
         <InfoCard icon={<Server size={20} />} title="analysis pipeline">
           multiple adapters race in parallel. the scorer caches the best timed word stream for the track.
         </InfoCard>
-        <InfoCard icon={<Waves size={20} />} title="dense rhyme view">
-          exact tails, internal rhymes, line endings, and near rhymes become color families with inspectable confidence.
+        <InfoCard icon={<Waves size={20} />} title="bar-level rhyme view">
+          bars stay readable as lyrics. rhyme spans get the color blocks, while inspect mode keeps the phoneme details out of the way.
         </InfoCard>
         <InfoCard icon={<LockKeyhole size={20} />} title="public-safe repo">
           github ships fixtures and architecture only. real spotify testing stays local until source boundaries are explicit.

@@ -25,8 +25,13 @@ export default function InstrumentClient() {
   const [inspect, setInspect] = useState(false);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTrackId = useRef<string | null>(null);
+  const demoStartedAt = useRef(0);
 
   const loadAnalysis = useCallback(async (track?: TrackIdentity) => {
+    if (!track) {
+      demoStartedAt.current = Date.now() - 5200;
+    }
+
     const body = track
       ? { track, requestedAdapters: ["fixture", "lrclib", "local-worker"] }
       : { track: { spotifyTrackId: DEMO_TRACK_ID, title: "demo cypher", artist: "saeshify", durationMs: 32000 } };
@@ -44,6 +49,10 @@ export default function InstrumentClient() {
     const next = (await response.json()) as TrackAnalysis;
     setAnalysis(next);
     lastTrackId.current = next.track.spotifyTrackId;
+  }, []);
+
+  useEffect(() => {
+    demoStartedAt.current = Date.now() - 5200;
   }, []);
 
   useEffect(() => {
@@ -100,12 +109,19 @@ export default function InstrumentClient() {
   useEffect(() => {
     let frame = 0;
     const tick = () => {
-      setDisplayMs(snapshot ? interpolatePlayback(snapshot) : 0);
+      if (snapshot) {
+        setDisplayMs(interpolatePlayback(snapshot));
+      } else if (analysis) {
+        const duration = analysis.track.durationMs || analysis.metrics.durationMs || 32_000;
+        setDisplayMs((Date.now() - demoStartedAt.current) % duration);
+      } else {
+        setDisplayMs(0);
+      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [snapshot]);
+  }, [analysis, snapshot]);
 
   const metricSummary = useMemo(() => {
     if (!analysis) return [];
@@ -137,8 +153,8 @@ export default function InstrumentClient() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-4 px-5 py-5 lg:grid-cols-[320px_1fr]">
-        <aside className="space-y-4">
+      <section className="mx-auto grid max-w-7xl gap-4 px-3 py-3 sm:px-5 sm:py-5 lg:grid-cols-[320px_1fr]">
+        <aside className="order-2 space-y-4 lg:order-1">
           <PlaybackPanel analysis={analysis} snapshot={snapshot} isLoading={isLoading} />
           <div className="rounded-md border border-[var(--line)] bg-white p-4">
             <div className="mb-3 flex items-center gap-2 text-sm font-black">
@@ -168,7 +184,7 @@ export default function InstrumentClient() {
           </button>
         </aside>
 
-        <section className="min-w-0 rounded-md border border-black bg-[#d7dde2] p-3">
+        <section className="order-1 min-w-0 rounded-md border border-black bg-[#d7dde2] p-2 sm:p-3 lg:order-2">
           <div className="mb-3 flex items-center justify-between rounded-sm bg-black px-4 py-3 text-white">
             <span className="text-sm font-black uppercase">
               {analysis?.track.artist || "saeshify"} - {analysis?.track.title || "loading"}

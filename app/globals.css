@@ -49,8 +49,3 @@ input {
   color: var(--token-color);
   box-shadow: 0 0 0 1px var(--token-outline);
 }
-
-.rhyme-token[data-active="true"] {
-  outline: 2px solid #111111;
-  outline-offset: 2px;
-}
