@@ -25,7 +25,7 @@ export default function InstrumentClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [audioBlockedTrackIds, setAudioBlockedTrackIds] = useState<Set<string>>(() => new Set());
   const [audioFailedTrackIds, setAudioFailedTrackIds] = useState<Set<string>>(() => new Set());
-  const [status, setStatus] = useState("loading bank");
+  const [status, setStatus] = useState("loading");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const displayMsRef = useRef(0);
   const lastTickRef = useRef<number | null>(null);
@@ -252,7 +252,7 @@ export default function InstrumentClient() {
       <section className="mx-auto grid max-w-[1500px] min-w-0 gap-4 px-3 py-4 sm:px-5 lg:grid-cols-[310px_1fr]">
         <aside className="min-w-0 overflow-hidden rounded-lg bg-[#181818] p-3 lg:min-h-[calc(100vh-190px)]">
           <div className="mb-3 flex items-center gap-2 px-2 text-sm font-black text-white">
-            <ListMusic size={18} /> local bank
+            <ListMusic size={18} /> tracks
           </div>
           <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 lg:grid-cols-1 lg:overflow-visible lg:pb-0">
             {bankTracks.map((track, index) => (
@@ -280,7 +280,7 @@ export default function InstrumentClient() {
             <div>
               <p className="mono text-[11px] uppercase text-[var(--spotify)]">{selectedTrack.bankNote || "local demo"}</p>
               <h1 className="mt-1 text-3xl font-black leading-none text-white sm:text-5xl">{selectedTrack.title}</h1>
-              <p className="mt-2 text-sm text-white/55">{selectedTrack.artist}</p>
+              <p className="mt-2 text-sm text-white/55">{selectedTrack.album || selectedTrack.bankLabel || selectedTrack.artist}</p>
             </div>
             <div className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2 text-xs text-white/64">
               <Volume2 size={15} />
@@ -399,7 +399,7 @@ async function fetchTrackAnalysis(track: FixtureTrack) {
 }
 
 function statusForPlayback(track: FixtureTrack, canUseAudio: boolean) {
-  return track.localAudioUrl && canUseAudio ? "playing local audio" : "playing local bank";
+  return track.localAudioUrl && canUseAudio ? "playing audio" : "playing clock";
 }
 
 function audioBadgeLabel(
@@ -408,10 +408,10 @@ function audioBadgeLabel(
   blockedTrackIds: Set<string>,
   failedTrackIds: Set<string>
 ) {
-  if (!track.localAudioUrl) return "public-safe clock";
-  if (failedTrackIds.has(track.spotifyTrackId)) return "audio unavailable";
-  if (blockedTrackIds.has(track.spotifyTrackId)) return "clock fallback";
-  return canUseAudio ? "local audio" : "public-safe clock";
+  if (!track.localAudioUrl) return "clock";
+  if (failedTrackIds.has(track.spotifyTrackId)) return "audio missing";
+  if (blockedTrackIds.has(track.spotifyTrackId)) return "clock";
+  return canUseAudio ? "audio" : "clock";
 }
 
 function addToSet<T>(set: Set<T>, item: T) {

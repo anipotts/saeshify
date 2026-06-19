@@ -257,7 +257,7 @@ integration tests:
 - mock now-playing track change.
 - analysis cache hit avoids reprocessing.
 - local manifest loads ahead of public fixtures.
-- missing audio falls back to public-safe clock.
+- missing audio falls back to the simulated clock.
 - unavailable analysis returns transparent state.
 
 visual checks:
@@ -304,9 +304,9 @@ browser checks:
 
 ## done means
 
-- public repo tells the right story.
+- repo docs stay honest about source boundaries.
 - private demo can show multiple Madvillainy tracks locally.
 - public fixture demo works without secrets.
-- landing page makes the backend/io system legible in under 15 seconds.
+- landing page makes the clock and instrument legible in under 15 seconds.
 - tests and cloudflare checks pass.
 - desktop and mobile screenshots look like a finished product, not a prototype.

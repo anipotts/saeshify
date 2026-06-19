@@ -68,7 +68,7 @@ the exact word reveal:
 
 the client fetches the local `.lrc`, sends it to the local analyzer route, computes
 phonetic rhyme families, and uses the audio element as the playback clock when the
-audio file exists. if audio is missing, the same track still runs on the public-safe
+audio file exists. if audio is missing, the same track still runs on the simulated
 clock so the rhyme sheet can be checked.
 
 ## rules
