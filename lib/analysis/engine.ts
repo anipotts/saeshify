@@ -1,7 +1,7 @@
 import { fixtureAdapter } from "./adapters/fixture";
 import { lrclibAdapter } from "./adapters/lrclib";
 import { localWorkerAdapter } from "./adapters/local-worker";
-import { analysisCacheKey, getCachedAnalysis, pipelineVersion, setCachedAnalysis } from "./cache";
+import { analysisCacheKey, analysisSourceVersion, getCachedAnalysis, pipelineVersion, setCachedAnalysis } from "./cache";
 import { chooseBestCandidate, scoreCandidate } from "./scoring";
 import type { AnalysisAdapterKind, AnalysisCandidate, AnalysisSource, TrackAnalysis, TrackIdentity } from "./types";
 import { detectDenseRhymes } from "@/lib/rhyme/detect";
@@ -64,7 +64,7 @@ export async function analyzeTrack({ track, requestedAdapters = ["fixture", "lrc
     provenance: {
       generatedAt: new Date().toISOString(),
       pipelineVersion: pipelineVersion(),
-      cacheKey: analysisCacheKey(best.track.spotifyTrackId, analysisSourceVersion(best.track))
+      cacheKey: analysisCacheKey(track.spotifyTrackId, sourceVersion)
     },
     quality: {
       score: scoreCandidate(best),
@@ -75,19 +75,4 @@ export async function analyzeTrack({ track, requestedAdapters = ["fixture", "lrc
 
   setCachedAnalysis(analysis);
   return analysis;
-}
-
-function analysisSourceVersion(track: TrackIdentity) {
-  const lrc = "lrc" in track && typeof track.lrc === "string" ? track.lrc : "";
-  if (!lrc) return "default";
-  return `inline-lrc-${fastHash(lrc)}`;
-}
-
-function fastHash(value: string) {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0).toString(36);
 }
