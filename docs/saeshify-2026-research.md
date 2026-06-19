@@ -3,9 +3,8 @@
 research date: 2026-06-19
 
 this doc is the current technical basis for the next saeshify build pass. it is
-not a generic ai-music app plan. the project should read as realtime backend/io:
-playback state in, analysis jobs through adapters, cached analysis out, visual
-clock sync on the client.
+not a generic ai-music app plan. saeshify should present as the instrument first:
+playback state in, timed words through, rhyme layer out.
 
 ## product framing
 
@@ -117,7 +116,7 @@ ship a polished saeshify demo around one or more Madvillainy tracks:
 - `/instrument` loads a local bank and plays from the selected track.
 - lyric sheet scrolls by bar and reveals words by timestamp.
 - rhyme families stay color-coded after they appear.
-- architecture and observability panels explain the backend/io path.
+- backend/io details stay in docs or quiet secondary readouts.
 - landing page uses the real screen recording as the primary artifact.
 
 ### later direction: queue-backed analysis

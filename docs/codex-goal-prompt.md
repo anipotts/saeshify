@@ -17,10 +17,10 @@ read first:
 - docs/spited-reference-study.md
 - docs/cloudflare-cutover.md
 
-project framing:
-- saeshify is its own experimental instrument, not an explainer page and not a
+product framing:
+- saeshify is its own instrument, not a case study, explainer page, or
   commercial music app.
-- backend/io is the system underneath, not the public surface screaming at users.
+- backend/io is the system underneath. the public surface stays quiet.
 - music-tech taste comes through the Spited-style rhyme sheet.
 - public copy one-liner: live rhyme instrumentation for spotify playback clocks.
 - public github must stay fixture-safe.
@@ -40,7 +40,7 @@ constraints:
 - keep human-facing copy lowercase, terse, technical, and concrete.
 
 implementation priorities:
-1. make the repo docs and project surface consistent with the product-first positioning.
+1. make the repo docs and product surface consistent with the instrument-first positioning.
 2. make /instrument a polished local song-bank product surface.
 3. make Madvillainy private local mode feel real with multiple selectable tracks
    when assets are available.

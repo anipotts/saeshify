@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://saeshify.com"),
   title: "saeshify",
-  description: "live rhyme instrumentation for spotify playback",
+  description: "live rhyme instrumentation for spotify playback clocks.",
   openGraph: {
     title: "saeshify",
-    description: "live rhyme instrumentation for spotify playback",
+    description: "live rhyme instrumentation for spotify playback clocks.",
     url: "https://saeshify.com",
     siteName: "saeshify"
   }

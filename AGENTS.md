@@ -9,14 +9,14 @@ to the clock.
 
 ## positioning
 
-- present saeshify as its own experimental instrument, not an explainer page and
-  not a commercial music app.
+- present saeshify as its own instrument, not a case study, explainer page, or
+  commercial music app.
 - use this one-liner: `live rhyme instrumentation for spotify playback clocks.`
-- public copy should be product-first and minimal. technical docs can mention
-  playback clocks, polling, drift correction, queues, adapters, caching, and rendering.
+- public copy should be sparse: name, one-liner, instrument, source.
+- technical docs can mention playback clocks, polling, drift correction, queues,
+  adapters, caching, and rendering.
 - `saeshify.com` is the intended standalone landing page.
-- `anipotts.com/projects/saeshify` should point to the standalone project page.
-- realtime backend/io matters, but keep the product surface spare and direct.
+- backend/io matters underneath, but the product surface stays spare and direct.
 
 ## current direction
 
@@ -68,7 +68,7 @@ to the clock.
 
 ## important docs
 
-- `README.md`: github-facing project explanation.
+- `README.md`: repo explanation.
 - `docs/saeshify-2026-research.md`: current technical anchors.
 - `docs/implementation-spec.md`: next implementation spec.
 - `docs/codex-goal-prompt.md`: goal prompt for a long autonomous codex pass.

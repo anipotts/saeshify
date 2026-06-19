@@ -2,13 +2,8 @@
 
 live rhyme instrumentation for spotify playback clocks.
 
-saeshify watches a playback clock, resolves the active track, scores lyric and
-timing sources, computes phonetic rhyme families, and renders a color-coded
-rhyme sheet as the track moves.
-
-it is an instrument first. the system underneath is external playback state in,
-timed-word analysis through adapters, cached track analyses out, and a lyric
-surface kept in sync with the audio clock.
+saeshify watches playback state, reconciles the clock, scores timed-word streams,
+and renders a Spited-style rhyme layer in sync.
 
 ## current status
 
@@ -16,7 +11,7 @@ surface kept in sync with the audio clock.
 - private local demo: supports real song assets under ignored `public/local-media/`.
 - target sample space: Madvillainy, the 2004 Madvillain album, plus a few adjacent
   MF DOOM tracks for stress testing dense rhyme schemes.
-- public surface: `saeshify.com` should be the standalone saeshify page.
+- public surface: `saeshify.com`.
 - hard boundary: do not commit downloaded audio or full copyrighted lyrics.
 
 ## demo
@@ -55,7 +50,7 @@ enhanced lrc shape:
 line timestamps drive bar layout and scroll position. embedded word timestamps
 drive exact reveal timing.
 
-## system shape
+## system
 
 ```mermaid
 flowchart LR
@@ -85,13 +80,7 @@ flowchart LR
 - optional local worker path for heavier transcription or alignment.
 - vitest, eslint, github actions, wrangler dry-run checks.
 
-## what makes it interesting
-
-saeshify turns external playback state into a synchronized lyric/rhyme
-instrument. the hard parts are timing, source quality, and keeping the renderer
-honest when the input stream is imperfect.
-
-system claims:
+saeshify is clock in, timed words through, rhyme layer out.
 
 - polling an external playback source without pretending it has webhooks.
 - interpolating a local clock and correcting drift.
@@ -125,5 +114,5 @@ before deploy or dry-run.
 ## deploy boundary
 
 do not push, deploy, flip dns, or bind `saeshify.com` without explicit sign-off.
-`saeshify.com` is the intended landing page, but the repo stays safe to run
-locally until the cloudflare cutover is approved.
+`saeshify.com` is the intended home, but the repo stays safe to run locally
+until the cloudflare cutover is approved.

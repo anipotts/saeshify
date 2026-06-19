@@ -192,15 +192,15 @@ avoid:
 
 ### landing page
 
-landing page should prioritize a real screen recording:
+landing page should be sparse:
 
-- hero: product name, one-liner, private demo video.
-- below: concise system diagram.
-- below: backend/io readout: poller, queue, scorer, cache, renderer.
-- below: fixture-safe public demo link and github link.
-- below: source-boundary note.
+- product name.
+- one-liner.
+- one technical sentence.
+- real screen recording or fixture preview.
+- open instrument and source links.
 
-copy should be lowercase, terse, and technical.
+copy should be lowercase, terse, and concrete.
 
 ## implementation phases
 
@@ -221,8 +221,8 @@ copy should be lowercase, terse, and technical.
 
 ### phase 3: public landing page
 
-- redesign `/` around the screen recording and backend/io system story.
-- add architecture diagram.
+- redesign `/` around the instrument preview.
+- keep system language quiet and below the product.
 - add public fixture demo route link.
 - keep `saeshify.com` cloudflare-first.
 - run full build and browser QA.
@@ -239,7 +239,7 @@ copy should be lowercase, terse, and technical.
 
 - record a private real-song demo video.
 - capture mobile proof.
-- write an anipotts.com project card.
+- write a short external pointer only after `saeshify.com` feels right.
 - decide whether to deploy `saeshify.com`.
 
 ## test plan
@@ -307,6 +307,6 @@ browser checks:
 - repo docs stay honest about source boundaries.
 - private demo can show multiple Madvillainy tracks locally.
 - public fixture demo works without secrets.
-- landing page makes the clock and instrument legible in under 15 seconds.
+- landing page feels like saeshify, not a case study.
 - tests and cloudflare checks pass.
 - desktop and mobile screenshots look like a finished product, not a prototype.
