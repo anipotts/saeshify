@@ -1,20 +1,27 @@
 # saeshify
 
-live rhyme instrumentation for spotify playback.
+live rhyme instrumentation for spotify playback clocks.
 
-saeshify watches your own spotify now-playing state, resolves the active track, runs lyric and timing adapters in parallel, scores the best analysis, computes dense phonetic rhyme families, and renders a color-coded lyric canvas synced to the playback clock.
+saeshify is a portfolio-system research demo for realtime backend/io. it watches a
+playback clock, resolves the active track, scores lyric and timing sources,
+computes phonetic rhyme families, and renders a Spited-style rhyme sheet as the
+track moves.
 
-the public repo ships fixtures only. private local mode can target real spotify tracks when you provide spotify credentials and optional local analysis services.
+the visible thing is music tech. the real project is the pipeline around it:
+external playback state in, analysis work queued and cached, clock drift corrected
+locally, and a dense visual surface kept in sync with the audio.
 
-## shape
+## current status
 
-- next.js 16 on cloudflare workers via opennext
-- local/private spotify now-playing polling with drift-corrected playback interpolation
-- analysis adapters for fixtures, lrclib private mode, and a local worker endpoint
-- deterministic phonetic rhyme detection for exact, internal, end, and near rhyme families
-- no committed full-song lyrics or downloaded audio
+- public repo: fixture-safe demo data only.
+- private local demo: supports real song assets under ignored `public/local-media/`.
+- target sample space: Madvillainy, the 2004 Madvillain album, plus a few adjacent
+  MF DOOM tracks for stress testing dense rhyme schemes.
+- public surface: `saeshify.com` should be the standalone project landing page.
+- portfolio framing: experimental system, not a commercial streaming product.
+- hard boundary: do not commit downloaded audio or full copyrighted lyrics.
 
-## local setup
+## demo
 
 ```bash
 npm install
@@ -24,42 +31,101 @@ npm run dev
 
 open `http://localhost:3000/instrument`.
 
-without spotify credentials, the app runs fixture mode. with spotify credentials, it can poll your active spotify playback from any device signed into the same account.
+without private assets, the instrument runs fixture mode. with a local manifest,
+ignored audio, and enhanced `.lrc` files, it can render real private songs with
+word-level karaoke timing.
 
-## private local song bank
+## private madvillainy bank
 
-drop ignored demo assets under `public/local-media/` and add a local
-`manifest.json` to make real private tracks appear ahead of the public fixtures in
-`/instrument`.
+copy `docs/mf-doom-local-bank.template.json` to:
 
-see `docs/local-private-bank.md` for the manifest and `.lrc` format. do not commit
-full-song lyrics or audio.
-
-## private spotify mode
-
-set these in `.env.local`:
-
-```bash
-SPOTIFY_CLIENT_ID=
-SPOTIFY_CLIENT_SECRET=
-SPOTIFY_REFRESH_TOKEN=
+```text
+public/local-media/manifest.json
 ```
 
-the app uses the refresh token server-side to call spotify's currently-playing endpoint. spotify does not provide playback webhooks, so realtime means polling plus local interpolation.
+then add legally supplied local audio and matching enhanced lrc files beside it.
+the app loads private local tracks ahead of public fixtures and keeps those files
+out of git.
 
-## optional local analysis worker
+enhanced lrc shape:
 
-```bash
-npm run local:demo
+```text
+[00:06.00]<00:06.00>first <00:06.32>timed <00:06.68>word <00:07.04>run
+[00:08.20]<00:08.20>next <00:08.54>bar <00:08.91>lands <00:09.22>clean
 ```
 
-this starts next.js and a local analysis worker stub. set `LOCAL_ANALYSIS_WORKER_URL=http://localhost:8788` to let the app ask that worker for analysis candidates.
+line timestamps drive bar layout and scroll position. embedded word timestamps
+drive exact reveal timing.
 
-## cloudflare
+## system shape
+
+```mermaid
+flowchart LR
+  spotify["spotify now-playing poller"]
+  clock["client playback clock"]
+  queue["analysis queue"]
+  adapters["fixture, lrclib, local worker"]
+  scorer["candidate scorer and cache"]
+  rhyme["phonetic rhyme engine"]
+  render["spited-style lyric renderer"]
+
+  spotify --> clock
+  clock --> render
+  spotify --> queue
+  queue --> adapters
+  adapters --> scorer
+  scorer --> rhyme
+  rhyme --> render
+```
+
+## stack
+
+- next.js 16, react 19, typescript, tailwind.
+- cloudflare workers through `@opennextjs/cloudflare`.
+- spotify web api for now-playing snapshots.
+- local enhanced lrc files for private real-song timing.
+- optional local worker path for heavier transcription or alignment.
+- vitest, eslint, github actions, wrangler dry-run checks.
+
+## why this exists
+
+saeshify is meant to show realtime backend/io taste in a way that is easier to
+understand than a generic agent dashboard. a recruiter can watch the demo and see
+a live external state stream become a synchronized visual product.
+
+strongest project claims:
+
+- polling an external playback source without pretending it has webhooks.
+- interpolating a local clock and correcting drift.
+- running multiple timing and lyric analysis paths behind one schema.
+- caching analyses by track and source version.
+- rendering bar-level rhyme families with word-level active timing.
+- keeping public github clean while supporting private real-song demos.
+
+## docs
+
+- `docs/saeshify-2026-research.md`: current technical anchors and direction.
+- `docs/implementation-spec.md`: implementation spec for the next build pass.
+- `docs/codex-goal-prompt.md`: long-running goal prompt for codex.
+- `docs/local-private-bank.md`: private song-bank setup.
+- `docs/spited-reference-study.md`: visual reference notes.
+- `docs/cloudflare-cutover.md`: dns and worker cutover checklist.
+
+## commands
 
 ```bash
+npm run lint
+npm test
+npm run build
 npm run cf:build
-wrangler deploy --dry-run
+npx wrangler deploy --dry-run
 ```
 
-dns migration notes live in `docs/cloudflare-cutover.md`. do not flip `saeshify.com` nameservers or deploy to the live domain without explicit sign-off.
+`npm run cf:build` strips `public/local-media` from the OpenNext asset bundle
+before deploy or dry-run.
+
+## deploy boundary
+
+do not push, deploy, flip dns, or bind `saeshify.com` without explicit sign-off.
+`saeshify.com` is the intended landing page, but the repo stays safe to run
+locally until the cloudflare cutover is approved.

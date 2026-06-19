@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "saeshify",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2026-06-17",
+  "compatibility_date": "2026-06-19",
   "compatibility_flags": ["nodejs_compat"],
   "account_id": "0f856093bdcd34a7da1bde5ee4385163",
   "workers_dev": true,
@@ -14,10 +14,26 @@
     "enabled": true,
     "head_sampling_rate": 1
   }
+  // Future realtime substrate, intentionally disabled until the solo demo is excellent:
+  // "queues": {
+  //   "producers": [
+  //     { "queue": "saeshify-analysis", "binding": "ANALYSIS_QUEUE" }
+  //   ],
+  //   "consumers": [
+  //     { "queue": "saeshify-analysis" }
+  //   ]
+  // },
+  // "durable_objects": {
+  //   "bindings": [
+  //     { "name": "PLAYBACK_SESSION", "class_name": "PlaybackSession" }
+  //   ]
+  // },
+  // "migrations": [
+  //   { "tag": "v1", "new_sqlite_classes": ["PlaybackSession"] }
+  // ]
   // Custom domains are enabled after the Cloudflare zone exists:
   // "routes": [
   //   { "pattern": "saeshify.com", "custom_domain": true, "zone_id": "<zone_id>" },
   //   { "pattern": "www.saeshify.com", "custom_domain": true, "zone_id": "<zone_id>" }
   // ]
 }
-

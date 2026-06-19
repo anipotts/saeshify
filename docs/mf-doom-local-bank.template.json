@@ -1,94 +1,104 @@
 {
   "tracks": [
     {
-      "spotifyTrackId": "local-mf-doom-rhymes-like-dimes",
-      "title": "rhymes like dimes",
-      "artist": "mf doom",
-      "bankLabel": "private mf doom",
-      "bankNote": "private local audio plus enhanced lrc",
-      "audioUrl": "mf-doom-rhymes-like-dimes.mp3",
-      "lrcUrl": "mf-doom-rhymes-like-dimes.lrc"
-    },
-    {
-      "spotifyTrackId": "local-mf-doom-doomsday",
-      "title": "doomsday",
-      "artist": "mf doom",
-      "bankLabel": "private mf doom",
-      "bankNote": "private local audio plus enhanced lrc",
-      "audioUrl": "mf-doom-doomsday.mp3",
-      "lrcUrl": "mf-doom-doomsday.lrc"
-    },
-    {
       "spotifyTrackId": "local-madvillain-accordion",
-      "title": "accordion",
-      "artist": "madvillain",
-      "bankLabel": "private mf doom",
+      "title": "Accordion",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
       "audioUrl": "madvillain-accordion.mp3",
       "lrcUrl": "madvillain-accordion.lrc"
     },
     {
       "spotifyTrackId": "local-madvillain-meat-grinder",
-      "title": "meat grinder",
-      "artist": "madvillain",
-      "bankLabel": "private mf doom",
+      "title": "Meat Grinder",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
       "audioUrl": "madvillain-meat-grinder.mp3",
       "lrcUrl": "madvillain-meat-grinder.lrc"
     },
     {
       "spotifyTrackId": "local-madvillain-figaro",
-      "title": "figaro",
-      "artist": "madvillain",
-      "bankLabel": "private mf doom",
+      "title": "Figaro",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
       "audioUrl": "madvillain-figaro.mp3",
       "lrcUrl": "madvillain-figaro.lrc"
     },
     {
       "spotifyTrackId": "local-madvillain-all-caps",
-      "title": "all caps",
-      "artist": "madvillain",
-      "bankLabel": "private mf doom",
+      "title": "All Caps",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
       "audioUrl": "madvillain-all-caps.mp3",
       "lrcUrl": "madvillain-all-caps.lrc"
     },
     {
-      "spotifyTrackId": "local-mf-doom-rapp-snitch-knishes",
-      "title": "rapp snitch knishes",
-      "artist": "mf doom",
-      "bankLabel": "private mf doom",
-      "bankNote": "private local audio plus enhanced lrc",
-      "audioUrl": "mf-doom-rapp-snitch-knishes.mp3",
-      "lrcUrl": "mf-doom-rapp-snitch-knishes.lrc"
-    },
-    {
-      "spotifyTrackId": "local-mf-doom-thats-that",
-      "title": "that's that",
-      "artist": "mf doom",
-      "bankLabel": "private mf doom",
-      "bankNote": "private local audio plus enhanced lrc",
-      "audioUrl": "mf-doom-thats-that.mp3",
-      "lrcUrl": "mf-doom-thats-that.lrc"
-    },
-    {
       "spotifyTrackId": "local-madvillain-rhinestone-cowboy",
-      "title": "rhinestone cowboy",
-      "artist": "madvillain",
-      "bankLabel": "private mf doom",
+      "title": "Rhinestone Cowboy",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
       "audioUrl": "madvillain-rhinestone-cowboy.mp3",
       "lrcUrl": "madvillain-rhinestone-cowboy.lrc"
     },
     {
-      "spotifyTrackId": "local-mf-doom-beef-rapp",
-      "title": "beef rapp",
-      "artist": "mf doom",
-      "bankLabel": "private mf doom",
+      "spotifyTrackId": "local-madvillain-americas-most-blunted",
+      "title": "America's Most Blunted",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
-      "audioUrl": "mf-doom-beef-rapp.mp3",
-      "lrcUrl": "mf-doom-beef-rapp.lrc"
+      "audioUrl": "madvillain-americas-most-blunted.mp3",
+      "lrcUrl": "madvillain-americas-most-blunted.lrc"
+    },
+    {
+      "spotifyTrackId": "local-madvillain-raid",
+      "title": "Raid",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
+      "bankNote": "private local audio plus enhanced lrc",
+      "audioUrl": "madvillain-raid.mp3",
+      "lrcUrl": "madvillain-raid.lrc"
+    },
+    {
+      "spotifyTrackId": "local-madvillain-curls",
+      "title": "Curls",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
+      "bankNote": "private local audio plus enhanced lrc",
+      "audioUrl": "madvillain-curls.mp3",
+      "lrcUrl": "madvillain-curls.lrc"
+    },
+    {
+      "spotifyTrackId": "local-madvillain-money-folder",
+      "title": "Money Folder",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
+      "bankNote": "private local audio plus enhanced lrc",
+      "audioUrl": "madvillain-money-folder.mp3",
+      "lrcUrl": "madvillain-money-folder.lrc"
+    },
+    {
+      "spotifyTrackId": "local-madvillain-strange-ways",
+      "title": "Strange Ways",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
+      "bankLabel": "private madvillainy",
+      "bankNote": "private local audio plus enhanced lrc",
+      "audioUrl": "madvillain-strange-ways.mp3",
+      "lrcUrl": "madvillain-strange-ways.lrc"
     }
   ]
 }

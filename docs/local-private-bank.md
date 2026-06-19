@@ -1,19 +1,19 @@
 # local private song bank
 
 private song demos live under `public/local-media/`, which is ignored by git.
-use this for mf doom, drake, kendrick, or any other real song assets you are
-testing locally. the Cloudflare build script strips `local-media` out of the
-OpenNext asset bundle before dry-run or deploy.
+use this for Madvillainy, MF DOOM, Drake, Kendrick, or any other real song assets
+you are testing locally. the Cloudflare build script strips `local-media` out of
+the OpenNext asset bundle before dry-run or deploy.
 
 ## file layout
 
 ```text
 public/local-media/
   manifest.json
-  doom-that-that.mp3
-  doom-that-that.lrc
-  doom-rhymes-like-dimes.mp3
-  doom-rhymes-like-dimes.lrc
+  madvillain-accordion.mp3
+  madvillain-accordion.lrc
+  madvillain-figaro.mp3
+  madvillain-figaro.lrc
 ```
 
 ## manifest
@@ -24,14 +24,15 @@ public/local-media/
 {
   "tracks": [
     {
-      "spotifyTrackId": "local-mf-doom-that-that",
-      "title": "that's that",
-      "artist": "mf doom",
+      "spotifyTrackId": "local-madvillain-accordion",
+      "title": "Accordion",
+      "artist": "Madvillain",
+      "album": "Madvillainy",
       "durationMs": 129000,
-      "bankLabel": "private mf doom",
-      "bankNote": "private local lrc",
-      "audioUrl": "doom-that-that.mp3",
-      "lrcUrl": "doom-that-that.lrc"
+      "bankLabel": "private madvillainy",
+      "bankNote": "private local audio plus enhanced lrc",
+      "audioUrl": "madvillain-accordion.mp3",
+      "lrcUrl": "madvillain-accordion.lrc"
     }
   ]
 }
@@ -40,7 +41,7 @@ public/local-media/
 urls can be bare filenames or `/local-media/...` paths. the app keeps them inside
 `/local-media/`.
 
-for the 10-track mf doom private demo scaffold, copy
+for the 10-track Madvillainy private demo scaffold, copy
 `docs/mf-doom-local-bank.template.json` to `public/local-media/manifest.json`,
 then place legally supplied audio and matching `.lrc` files next to it. the
 template is metadata only; it intentionally contains no copyrighted audio or full
