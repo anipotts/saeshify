@@ -60,6 +60,7 @@ export default function KaraokeRhymePlayer({
         <div className="pb-[42vh]">
           {analysis.lines.map((line, index) => {
             const words = line.wordIds.map((wordId) => wordById.get(wordId)).filter(Boolean) as AnalysisWord[];
+            const segments = buildLineSegments(words, displayFamilyByWordId);
             const active = index === activeLineIndex;
             const past = currentMs > line.endMs + 200;
 
@@ -82,14 +83,12 @@ export default function KaraokeRhymePlayer({
                     compact ? "text-[23px] sm:text-[30px]" : "text-[23px] sm:text-[31px] xl:text-[35px]"
                   )}
                 >
-                  {words.map((word, wordIndex) => (
-                    <TimedWord
-                      key={word.id}
-                      active={word.id === activeWordId}
+                  {segments.map((segment) => (
+                    <PhraseSegment
+                      key={segment.words.map(({ word }) => word.id).join(":")}
+                      activeWordId={activeWordId}
                       currentMs={currentMs}
-                      family={displayFamilyByWordId.get(word.id) || null}
-                      word={word}
-                      wordIndex={wordIndex}
+                      segment={segment}
                     />
                   ))}
                 </p>
@@ -102,16 +101,84 @@ export default function KaraokeRhymePlayer({
   );
 }
 
+interface LineSegment {
+  family: RhymeFamily | null;
+  words: Array<{
+    word: AnalysisWord;
+    wordIndex: number;
+  }>;
+}
+
+function PhraseSegment({
+  activeWordId,
+  currentMs,
+  segment
+}: {
+  activeWordId: string | null;
+  currentMs: number;
+  segment: LineSegment;
+}) {
+  const firstWord = segment.words[0]?.word;
+  const lastWord = segment.words.at(-1)?.word;
+  const mergedPhrase = Boolean(segment.family && segment.words.length > 1 && lastWord && currentMs >= lastWord.endMs);
+
+  if (!mergedPhrase || !segment.family || !firstWord || !lastWord) {
+    return (
+      <>
+        {segment.words.map(({ word, wordIndex }) => (
+          <TimedWord
+            key={word.id}
+            active={word.id === activeWordId}
+            currentMs={currentMs}
+            family={segment.family}
+            mergedPhrase={false}
+            word={word}
+            wordIndex={wordIndex}
+          />
+        ))}
+      </>
+    );
+  }
+
+  const phraseFill = `${segment.family.color}${segment.family.confidence >= 0.85 ? "e8" : "a6"}`;
+  const title = `${segment.family.kind} / ${segment.family.tail} / ${Math.round(segment.family.confidence * 100)}%`;
+
+  return (
+    <>
+      {segment.words[0].wordIndex > 0 ? " " : null}
+      <span
+        className="rhyme-phrase box-decoration-clone rounded-[2px] px-[0.08em] py-[0.01em] font-medium"
+        style={{ background: phraseFill }}
+        title={title}
+      >
+        {segment.words.map(({ word }, localIndex) => (
+          <TimedWord
+            key={word.id}
+            active={word.id === activeWordId}
+            currentMs={currentMs}
+            family={segment.family}
+            mergedPhrase
+            word={word}
+            wordIndex={localIndex}
+          />
+        ))}
+      </span>
+    </>
+  );
+}
+
 function TimedWord({
   active,
   currentMs,
   family,
+  mergedPhrase,
   word,
   wordIndex
 }: {
   active: boolean;
   currentMs: number;
   family: RhymeFamily | null;
+  mergedPhrase: boolean;
   word: AnalysisWord;
   wordIndex: number;
 }) {
@@ -119,7 +186,7 @@ function TimedWord({
   const passed = currentMs >= word.endMs;
   const progress = active ? Math.min(Math.max((currentMs - word.startMs) / Math.max(word.endMs - word.startMs, 1), 0), 1) : 0;
   const familyFill = family ? `${family.color}${family.confidence >= 0.85 ? "e8" : "a6"}` : "transparent";
-  const background = family && reached ? familyFill : "transparent";
+  const background = !mergedPhrase && family && reached ? familyFill : "transparent";
   const karaokeFill = family && reached ? `${family.color}${family.confidence >= 0.85 ? "f2" : "cc"}` : "rgb(30 215 96 / 0.34)";
   const textColor = reached ? "#111111" : "rgb(17 17 17 / 0.32)";
   const title = family ? `${family.kind} / ${family.tail} / ${Math.round(family.confidence * 100)}%` : word.text;
@@ -166,6 +233,26 @@ function getActiveWordId(words: AnalysisWord[], currentMs: number) {
   return words.find((word) => currentMs >= word.startMs && currentMs <= word.endMs)?.id || null;
 }
 
+function buildLineSegments(words: AnalysisWord[], displayFamilyByWordId: Map<string, RhymeFamily>) {
+  const segments: LineSegment[] = [];
+
+  words.forEach((word, wordIndex) => {
+    const family = displayFamilyByWordId.get(word.id) || null;
+    const previous = segments.at(-1);
+    if (previous && previous.family?.id === family?.id) {
+      previous.words.push({ word, wordIndex });
+      return;
+    }
+
+    segments.push({
+      family,
+      words: [{ word, wordIndex }]
+    });
+  });
+
+  return segments;
+}
+
 function displayFamily(word: AnalysisWord, familyById: Map<string, RhymeFamily>) {
   if (QUIET_WORDS.has(word.normalized)) return null;
   const families = word.rhymeFamilyIds
@@ -209,7 +296,7 @@ function buildDisplayFamilyMap(
 }
 
 function familyWeight(family: RhymeFamily) {
-  const kindWeight = family.kind === "end" ? 0.3 : family.kind === "internal" ? 0.16 : 0.04;
+  const kindWeight = family.kind === "multi" ? 0.38 : family.kind === "end" ? 0.3 : family.kind === "internal" ? 0.16 : 0.04;
   return family.confidence + kindWeight + family.wordIds.length / 120;
 }
 

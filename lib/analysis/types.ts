@@ -35,7 +35,7 @@ export interface AnalysisLine {
   wordIds: string[];
 }
 
-export type RhymeKind = "end" | "internal" | "near";
+export type RhymeKind = "end" | "internal" | "multi" | "near";
 
 export interface RhymeFamily {
   id: string;
@@ -87,4 +87,3 @@ export interface TrackAnalysis {
     warnings: string[];
   };
 }
-

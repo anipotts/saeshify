@@ -48,8 +48,8 @@ export const fixtureTracks: FixtureTrack[] = [
     localAudioUrl: process.env.NEXT_PUBLIC_SAESHIFY_DOOM_SLOT_A_AUDIO_URL || undefined,
     lrc: `[00:00.00] mask light flashes on a black home screen
 [00:03.40] stacked rhyme patches where the track goes green
-[00:06.80] right rail waits for the next night scene
-[00:10.10] tight page shakes when the bright lines lean
+[00:06.80] right rail waits in a low light
+[00:10.10] tight page shakes through a slow night
 [00:13.80] old code moves with a low slow glow
 [00:17.20] close notes fold where the cold tones go
 [00:20.90] chrome bars march in a clean square frame
