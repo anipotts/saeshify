@@ -27,7 +27,8 @@ const requestSchema = z.object({
     })
     .optional(),
   requestedAdapters: z.array(z.enum(["fixture", "lrclib", "local-worker"])).optional(),
-  processNow: z.boolean().optional()
+  processNow: z.boolean().optional(),
+  includeResult: z.boolean().optional()
 });
 
 export async function GET(request: Request) {
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       ok: true,
-      job: publicAnalysisJob(next || job)
+      job: publicAnalysisJob(next || job, { includeResult: parsed.data.includeResult })
     },
     { status: 202 }
   );

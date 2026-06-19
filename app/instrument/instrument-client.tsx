@@ -87,14 +87,14 @@ export default function InstrumentClient() {
 
     const next = await fetchTrackAnalysis(track);
 
-    if (!next) {
+    if (!next.analysis) {
       setStatus("analysis unavailable");
       setIsPlaying(false);
       setIsLoading(false);
       return;
     }
 
-    setAnalysis(next);
+    setAnalysis(next.analysis);
     setIsPlaying(shouldPlay);
     setStatus(
       shouldPlay
@@ -142,8 +142,8 @@ export default function InstrumentClient() {
       setBankTracks(tracks);
       setSelectedTrackId(initial.track.spotifyTrackId);
       setDisplayMs(initial.startMs);
-      if (next) {
-        setAnalysis(next);
+      if (next.analysis) {
+        setAnalysis(next.analysis);
         setIsPlaying(initial.autoplay);
         setStatus(initial.autoplay ? statusForPlayback(initial.track, true) : "ready");
       } else {
@@ -398,15 +398,48 @@ function formatClock(ms: number) {
   return `${minutes}:${seconds}`;
 }
 
-async function fetchTrackAnalysis(track: FixtureTrack) {
+interface AnalysisLoadResult {
+  analysis: TrackAnalysis | null;
+  jobStatus?: string;
+}
+
+async function fetchTrackAnalysis(track: FixtureTrack): Promise<AnalysisLoadResult> {
+  const jobResponse = await fetch("/api/analyze/jobs", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      track,
+      requestedAdapters: ["fixture"],
+      includeResult: true
+    })
+  }).catch(() => null);
+
+  if (jobResponse?.ok) {
+    const payload = (await jobResponse.json().catch(() => null)) as
+      | {
+          job?: {
+            status?: string;
+            result?: TrackAnalysis;
+          };
+        }
+      | null;
+
+    if (payload?.job?.result) {
+      return {
+        analysis: payload.job.result,
+        jobStatus: payload.job.status
+      };
+    }
+  }
+
   const response = await fetch("/api/analyze", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ track, requestedAdapters: ["fixture"] })
   });
 
-  if (!response.ok) return null;
-  return (await response.json()) as TrackAnalysis;
+  if (!response.ok) return { analysis: null };
+  return { analysis: (await response.json()) as TrackAnalysis };
 }
 
 function statusForPlayback(track: FixtureTrack, canUseAudio: boolean) {

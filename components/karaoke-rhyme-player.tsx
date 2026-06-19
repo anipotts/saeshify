@@ -35,8 +35,9 @@ export default function KaraokeRhymePlayer({
     const focusY = compact ? container.clientHeight * 0.26 : container.clientHeight * 0.34;
     const containerBox = container.getBoundingClientRect();
     const nodeBox = node.getBoundingClientRect();
+    const targetTop = Math.max(container.scrollTop + nodeBox.top - containerBox.top - focusY, 0);
     container.scrollTo({
-      top: Math.max(container.scrollTop + nodeBox.top - containerBox.top - focusY, 0),
+      top: alignToLineStart(targetTop, analysis.lines, lineRefs.current),
       behavior: "smooth"
     });
   }, [activeLineIndex, analysis.lines, compact]);
@@ -227,6 +228,15 @@ function getActiveLineIndex(lines: AnalysisLine[], currentMs: number) {
     if (currentMs > lines[index].endMs) return index;
   }
   return 0;
+}
+
+function alignToLineStart(targetTop: number, lines: AnalysisLine[], refs: Record<string, HTMLElement | null>) {
+  const starts = lines
+    .map((line) => refs[line.id]?.offsetTop)
+    .filter((offset): offset is number => typeof offset === "number")
+    .sort((left, right) => left - right);
+  const previous = starts.filter((offset) => offset <= targetTop).at(-1);
+  return previous ?? 0;
 }
 
 function getActiveWordId(words: AnalysisWord[], currentMs: number) {

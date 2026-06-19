@@ -83,6 +83,15 @@ describe("analysis jobs", () => {
     expect(published.status).toBe("completed");
   });
 
+  it("can publish a completed result when explicitly requested", async () => {
+    const job = enqueueAnalysisJob({ track: makeTrack("job-result"), requestedAdapters: ["fixture"] });
+    const processed = await processAnalysisJob(job.id);
+    const published = publicAnalysisJob(processed!, { includeResult: true });
+
+    expect(published.result?.track.spotifyTrackId).toBe("job-result");
+    expect(published.status).toBe("completed");
+  });
+
   it("updates heartbeat timestamps on processing jobs", () => {
     const job = enqueueAnalysisJob({ track: makeTrack("job-heartbeat") }, { id: "job-heartbeat", now: at(0) });
     const heartbeat = heartbeatAnalysisJob(job.id, at(2000));
