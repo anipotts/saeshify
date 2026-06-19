@@ -83,6 +83,14 @@ export function buildRhymeLineSegments(words: AnalysisWord[], displayFamilyByWor
   return segments;
 }
 
+export function scrollAnchorLineIndex(activeLineIndex: number, lineCount: number, contextLines: number) {
+  if (lineCount <= 0) return 0;
+
+  const safeActiveIndex = Math.min(Math.max(activeLineIndex, 0), lineCount - 1);
+  const safeContextLines = Math.max(0, Math.floor(contextLines));
+  return Math.max(0, safeActiveIndex - safeContextLines);
+}
+
 export function visibleRhymeFamiliesForWords(words: AnalysisWord[], familyById: Map<string, RhymeFamily>) {
   const families = new Map<string, RhymeFamily>();
   words.forEach((word) => {

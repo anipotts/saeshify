@@ -3,7 +3,13 @@
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import type { AnalysisLine, AnalysisWord, RhymeFamily, TrackAnalysis } from "@/lib/analysis/types";
-import { buildRhymeDisplayMap, buildRhymeLineSegments, wordsForLine, type RhymeLineSegment } from "@/lib/rhyme/display";
+import {
+  buildRhymeDisplayMap,
+  buildRhymeLineSegments,
+  scrollAnchorLineIndex,
+  wordsForLine,
+  type RhymeLineSegment
+} from "@/lib/rhyme/display";
 
 export default function KaraokeRhymePlayer({
   analysis,
@@ -31,14 +37,19 @@ export default function KaraokeRhymePlayer({
     const node = activeLine ? lineRefs.current[activeLine.id] : null;
     if (!container || !node) return;
 
-    const focusY = compact ? container.clientHeight * 0.26 : container.clientHeight * 0.34;
+    const contextLines = compact || container.clientWidth < 620 ? 2 : 3;
+    const anchorIndex = scrollAnchorLineIndex(activeLineIndex, analysis.lines.length, contextLines);
+    const anchorLine = analysis.lines[anchorIndex];
+    const anchorNode = anchorLine ? lineRefs.current[anchorLine.id] : node;
+    const targetNode = anchorNode || node;
     const containerBox = container.getBoundingClientRect();
-    const nodeBox = node.getBoundingClientRect();
-    const targetTop = Math.max(container.scrollTop + nodeBox.top - containerBox.top - focusY, 0);
-    const topInset = compact ? 14 : 22;
+    const topInset = 0;
+    const nodeBox = targetNode.getBoundingClientRect();
+    const targetTop = Math.max(container.scrollTop + nodeBox.top - containerBox.top - topInset, 0);
+    const distance = Math.abs(targetTop - container.scrollTop);
     container.scrollTo({
-      top: alignToLineStart(targetTop, analysis.lines, lineRefs.current, container, topInset),
-      behavior: "smooth"
+      top: targetTop,
+      behavior: distance > container.clientHeight * 0.55 ? "auto" : "smooth"
     });
   }, [activeLineIndex, analysis.lines, compact]);
 
@@ -220,27 +231,6 @@ function getActiveLineIndex(lines: AnalysisLine[], currentMs: number) {
     if (currentMs > lines[index].endMs) return index;
   }
   return 0;
-}
-
-function alignToLineStart(
-  targetTop: number,
-  lines: AnalysisLine[],
-  refs: Record<string, HTMLElement | null>,
-  container: HTMLElement,
-  topInset: number
-) {
-  const containerBox = container.getBoundingClientRect();
-  const starts = lines
-    .map((line) => {
-      const node = refs[line.id];
-      if (!node) return null;
-      const nodeBox = node.getBoundingClientRect();
-      return container.scrollTop + nodeBox.top - containerBox.top;
-    })
-    .filter((offset): offset is number => typeof offset === "number")
-    .sort((left, right) => left - right);
-  const previous = starts.filter((offset) => offset <= targetTop).at(-1);
-  return Math.max((previous ?? 0) - topInset, 0);
 }
 
 function getActiveWordId(words: AnalysisWord[], currentMs: number) {

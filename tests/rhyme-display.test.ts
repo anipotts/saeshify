@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { AnalysisLine, AnalysisWord, RhymeFamily } from "@/lib/analysis/types";
-import { buildRhymeDisplayMap, buildRhymeLineSegments, selectRhymeDisplayFamily } from "@/lib/rhyme/display";
+import {
+  buildRhymeDisplayMap,
+  buildRhymeLineSegments,
+  scrollAnchorLineIndex,
+  selectRhymeDisplayFamily
+} from "@/lib/rhyme/display";
 
 describe("rhyme display model", () => {
   it("merges adjacent words from the same displayed family into phrase spans", () => {
@@ -45,6 +50,12 @@ describe("rhyme display model", () => {
     const display = buildRhymeDisplayMap([line], wordById, familyById);
 
     expect(display.size).toBe(5);
+  });
+
+  it("anchors auto-scroll on a whole context line above the active bar", () => {
+    expect(scrollAnchorLineIndex(7, 20, 3)).toBe(4);
+    expect(scrollAnchorLineIndex(1, 20, 3)).toBe(0);
+    expect(scrollAnchorLineIndex(50, 8, 2)).toBe(5);
   });
 });
 
