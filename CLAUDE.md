@@ -1,21 +1,22 @@
 # saeshify agent context
 
-saeshify is a portfolio-system research demo for realtime backend/io.
+saeshify is a realtime rhyme instrumentation system for spotify playback clocks.
 
-the visible product is a Spited-style rhyme visualization for spotify playback
-clocks. the actual project signal is the system behind it: external playback state
-in, analysis jobs through adapters, cacheable track analyses out, and a synced
-frontend that proves the pipeline is working.
+the visible product is the instrument: a Spited-style rhyme visualization synced
+to playback. the system underneath is external playback state in, analysis jobs
+through adapters, cacheable track analyses out, and a frontend that stays locked
+to the clock.
 
 ## positioning
 
-- present saeshify as an experimental portfolio system, not a commercial music app.
+- present saeshify as its own experimental instrument, not an explainer page and
+  not a commercial music app.
 - use this one-liner: `live rhyme instrumentation for spotify playback clocks.`
-- public copy may mention spotify, but technical copy should emphasize playback
-  clocks, polling, drift correction, queues, adapters, caching, and rendering.
+- public copy should be product-first and minimal. technical docs can mention
+  playback clocks, polling, drift correction, queues, adapters, caching, and rendering.
 - `saeshify.com` is the intended standalone landing page.
 - `anipotts.com/projects/saeshify` should point to the standalone project page.
-- real-time backend/io is the primary hiring signal. music-tech taste is secondary.
+- realtime backend/io matters, but keep the product surface spare and direct.
 
 ## current direction
 
@@ -36,8 +37,8 @@ frontend that proves the pipeline is working.
 - preserve spotify refresh tokens server-side only.
 - never commit downloaded audio, full copyrighted lyrics, `.env*`, or private
   local media.
-- private real-song screen recordings are acceptable as portfolio assets when
-  Ani explicitly asks, but do not add the raw assets to git.
+- private real-song screen recordings are acceptable demo assets when Ani
+  explicitly asks, but do not add the raw assets to git.
 - do not push, merge, deploy, bind domains, or change dns without explicit sign-off.
 - keep human-facing copy lowercase, terse, technical, and concrete.
 

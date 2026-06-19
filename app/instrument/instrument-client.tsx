@@ -6,28 +6,15 @@ import { ListMusic, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 import KaraokeRhymePlayer from "@/components/karaoke-rhyme-player";
 import { fixtureTracks, type FixtureTrack } from "@/lib/analysis/fixtures";
 import type { TrackAnalysis } from "@/lib/analysis/types";
+import {
+  LOCAL_MANIFEST_URL,
+  mergeLocalTracks,
+  resolveInitialPlayback,
+  resolveLocalManifestTracks,
+  type LocalBankManifest
+} from "@/lib/local-bank";
 
 const INITIAL_TRACK_ID = fixtureTracks[0].spotifyTrackId;
-const LOCAL_MANIFEST_URL = "/local-media/manifest.json";
-
-interface LocalBankManifestTrack {
-  spotifyTrackId: string;
-  title: string;
-  artist: string;
-  album?: string;
-  durationMs?: number;
-  artworkUrl?: string;
-  bankLabel?: string;
-  bankNote?: string;
-  localAudioUrl?: string;
-  audioUrl?: string;
-  lrcUrl?: string;
-  lrc?: string;
-}
-
-interface LocalBankManifest {
-  tracks?: LocalBankManifestTrack[];
-}
 
 export default function InstrumentClient() {
   const [bankTracks, setBankTracks] = useState<FixtureTrack[]>(fixtureTracks);
@@ -312,11 +299,11 @@ export default function InstrumentClient() {
               setIsPlaying(false);
               setStatus("ended");
             }}
-              onError={() => {
-                setAudioFailedTrackIds((previous) => new Set(previous).add(selectedTrack.spotifyTrackId));
-                setIsPlaying(true);
-                setStatus("audio unavailable; clock fallback");
-              }}
+            onError={() => {
+              setAudioFailedTrackIds((previous) => new Set(previous).add(selectedTrack.spotifyTrackId));
+              setIsPlaying(true);
+              setStatus("audio unavailable; clock fallback");
+            }}
           />
 
           {analysis ? (
@@ -442,42 +429,9 @@ function deleteFromSet<T>(set: Set<T>, item: T) {
 }
 
 async function loadSongBank(): Promise<FixtureTrack[]> {
-  const localTracks = await fetchLocalManifestTracks();
-  if (localTracks.length === 0) return fixtureTracks;
-
-  const localIds = new Set(localTracks.map((track) => track.spotifyTrackId));
-  return [...localTracks, ...fixtureTracks.filter((track) => !localIds.has(track.spotifyTrackId))];
-}
-
-async function fetchLocalManifestTracks(): Promise<FixtureTrack[]> {
   const manifest = await fetchJson<LocalBankManifest>(LOCAL_MANIFEST_URL);
-  if (!manifest?.tracks?.length) return [];
-
-  const tracks = await Promise.all(manifest.tracks.map(resolveLocalManifestTrack));
-  return tracks.filter((track): track is FixtureTrack => Boolean(track));
-}
-
-async function resolveLocalManifestTrack(track: LocalBankManifestTrack): Promise<FixtureTrack | null> {
-  if (!track.spotifyTrackId || !track.title || !track.artist) return null;
-
-  const lrcUrl = normalizeLocalMediaUrl(track.lrcUrl);
-  const localAudioUrl = normalizeLocalMediaUrl(track.localAudioUrl || track.audioUrl);
-  const lrc = track.lrc || (lrcUrl ? await fetchText(lrcUrl) : null);
-  if (!lrc?.trim()) return null;
-
-  return {
-    spotifyTrackId: track.spotifyTrackId,
-    title: track.title,
-    artist: track.artist,
-    album: track.album,
-    durationMs: track.durationMs,
-    artworkUrl: track.artworkUrl,
-    bankLabel: track.bankLabel || "private local",
-    bankNote: track.bankNote || "private local lrc",
-    localAudioUrl,
-    lrcUrl,
-    lrc
-  };
+  const localTracks = await resolveLocalManifestTracks(manifest, fetchText);
+  return mergeLocalTracks(localTracks);
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
@@ -490,12 +444,6 @@ async function fetchText(url: string): Promise<string | null> {
   const response = await fetch(url, { cache: "no-store" }).catch(() => null);
   if (!response?.ok) return null;
   return response.text();
-}
-
-function normalizeLocalMediaUrl(value?: string) {
-  if (!value) return undefined;
-  if (value.startsWith("/local-media/")) return value;
-  return `/local-media/${value.replace(/^\/+/, "")}`;
 }
 
 function seekAudioWhenReady(audio: HTMLAudioElement, startMs: number) {
@@ -513,13 +461,13 @@ function seekAudioWhenReady(audio: HTMLAudioElement, startMs: number) {
 
 function readInitialPlayback(tracks: FixtureTrack[]) {
   if (typeof window === "undefined") {
-    return { track: tracks[0] || fixtureTracks[0], startMs: 0, autoplay: false };
+    return resolveInitialPlayback(tracks);
   }
 
   const params = new URLSearchParams(window.location.search);
-  const requestedTrackId = params.get("track");
-  const track = tracks.find((candidate) => candidate.spotifyTrackId === requestedTrackId) || tracks[0] || fixtureTracks[0];
-  const startMs = Math.max(0, Number(params.get("startMs") || 0));
-  const autoplay = params.get("autoplay") === "1";
-  return { track, startMs, autoplay };
+  return resolveInitialPlayback(tracks, {
+    requestedTrackId: params.get("track"),
+    startMs: params.get("startMs"),
+    autoplay: params.get("autoplay")
+  });
 }

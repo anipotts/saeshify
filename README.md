@@ -2,14 +2,13 @@
 
 live rhyme instrumentation for spotify playback clocks.
 
-saeshify is a portfolio-system research demo for realtime backend/io. it watches a
-playback clock, resolves the active track, scores lyric and timing sources,
-computes phonetic rhyme families, and renders a Spited-style rhyme sheet as the
-track moves.
+saeshify watches a playback clock, resolves the active track, scores lyric and
+timing sources, computes phonetic rhyme families, and renders a color-coded
+rhyme sheet as the track moves.
 
-the visible thing is music tech. the real project is the pipeline around it:
-external playback state in, analysis work queued and cached, clock drift corrected
-locally, and a dense visual surface kept in sync with the audio.
+it is an instrument first. the system underneath is external playback state in,
+timed-word analysis through adapters, cached track analyses out, and a lyric
+surface kept in sync with the audio clock.
 
 ## current status
 
@@ -17,8 +16,7 @@ locally, and a dense visual surface kept in sync with the audio.
 - private local demo: supports real song assets under ignored `public/local-media/`.
 - target sample space: Madvillainy, the 2004 Madvillain album, plus a few adjacent
   MF DOOM tracks for stress testing dense rhyme schemes.
-- public surface: `saeshify.com` should be the standalone project landing page.
-- portfolio framing: experimental system, not a commercial streaming product.
+- public surface: `saeshify.com` should be the standalone saeshify page.
 - hard boundary: do not commit downloaded audio or full copyrighted lyrics.
 
 ## demo
@@ -87,13 +85,13 @@ flowchart LR
 - optional local worker path for heavier transcription or alignment.
 - vitest, eslint, github actions, wrangler dry-run checks.
 
-## why this exists
+## what makes it interesting
 
-saeshify is meant to show realtime backend/io taste in a way that is easier to
-understand than a generic agent dashboard. a recruiter can watch the demo and see
-a live external state stream become a synchronized visual product.
+saeshify turns external playback state into a synchronized lyric/rhyme
+instrument. the hard parts are timing, source quality, and keeping the renderer
+honest when the input stream is imperfect.
 
-strongest project claims:
+system claims:
 
 - polling an external playback source without pretending it has webhooks.
 - interpolating a local clock and correcting drift.

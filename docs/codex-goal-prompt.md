@@ -6,7 +6,7 @@ use this prompt when handing saeshify to codex for the next autonomous build pas
 you are codex working in /Users/anipotts/Personal/people/saesha-rajput/saeshify.
 
 goal: implement docs/implementation-spec.md end to end until saeshify is a
-portfolio-ready realtime backend/io research demo.
+polished realtime rhyme instrument with a backend/io core.
 
 read first:
 - AGENTS.md
@@ -18,9 +18,10 @@ read first:
 - docs/cloudflare-cutover.md
 
 project framing:
-- saeshify is a portfolio-system research demo, not a commercial music app.
-- primary hiring signal: realtime backend/io.
-- secondary signal: music-tech taste through a Spited-style rhyme sheet.
+- saeshify is its own experimental instrument, not an explainer page and not a
+  commercial music app.
+- backend/io is the system underneath, not the public surface screaming at users.
+- music-tech taste comes through the Spited-style rhyme sheet.
 - public copy one-liner: live rhyme instrumentation for spotify playback clocks.
 - public github must stay fixture-safe.
 - private local demo should use Madvillainy as the foundation.
@@ -39,14 +40,14 @@ constraints:
 - keep human-facing copy lowercase, terse, technical, and concrete.
 
 implementation priorities:
-1. make the repo docs and project surface consistent with the 2026 positioning.
+1. make the repo docs and project surface consistent with the product-first positioning.
 2. make /instrument a polished local song-bank product surface.
 3. make Madvillainy private local mode feel real with multiple selectable tracks
    when assets are available.
 4. improve rhyme highlighting toward bar-level Spited quality, not isolated word
    chips.
-5. make the public landing page at / explain the realtime backend/io system with
-   a strong visual demo slot.
+5. make the public landing page at / feel like saeshify itself: minimal, direct,
+   and centered on the instrument.
 6. add or improve tests for parser, playback clock, spotify backoff, analysis
    scoring, cache behavior, local manifest, and visual edge cases.
 

@@ -9,7 +9,7 @@ clock sync on the client.
 
 ## product framing
 
-saeshify should present as a portfolio-system research demo.
+saeshify should present as its own realtime rhyme instrument.
 
 public one-liner:
 
@@ -111,7 +111,7 @@ platform migration target.
 
 ### best next direction
 
-ship a polished portfolio demo around one or more Madvillainy tracks:
+ship a polished saeshify demo around one or more Madvillainy tracks:
 
 - local private audio plus enhanced lrc timing.
 - `/instrument` loads a local bank and plays from the selected track.
@@ -151,7 +151,7 @@ use local whisperx or a realtime transcription API when lrc timing is missing:
 - adapter emits the same `TrackAnalysis` candidate shape.
 - scorer compares it against synced lyric candidates.
 
-do not block the portfolio demo on this. a hand-timed enhanced lrc for a few
+do not block the main demo on this. a hand-timed enhanced lrc for a few
 Madvillainy tracks will produce a stronger demo faster.
 
 ## source boundaries

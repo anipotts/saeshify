@@ -4,7 +4,7 @@ version: 2026-06-19
 
 ## goal
 
-turn saeshify into a portfolio-ready realtime backend/io research demo.
+turn saeshify into a polished realtime rhyme instrument with a backend/io core.
 
 the end state is not a generic ai music app. it is a working system that makes a
 playback clock visible: spotify-style input state, queued or cached analysis,
@@ -13,12 +13,11 @@ the track.
 
 ## north star
 
-the demo should make a technical reviewer think:
+the product should make the system feel obvious without over-explaining it:
 
 ```text
-this person can build realtime systems that reconcile external state, schedule
-work, cache artifacts, stream state to a high-polish frontend, and verify the
-whole thing like production software.
+playback state comes in, analysis resolves to timed words, rhyme families appear,
+and the lyric surface stays locked to the song.
 ```
 
 ## public scope
@@ -28,7 +27,7 @@ public github and `saeshify.com` should include:
 - cloudflare-ready next.js app.
 - public fixture demo that always works.
 - screenshot and short recording of the instrument.
-- architecture explanation centered on backend/io.
+- short system explanation centered on the playback clock.
 - local private mode docs for real-song assets.
 - tests and ci that prove the pipeline is not a static mock.
 - no raw copyrighted audio or full lyrics committed to git.
@@ -236,7 +235,7 @@ copy should be lowercase, terse, and technical.
 - keep heavy audio processing out of the worker.
 - add observability readouts for pending, processing, cached, failed.
 
-### phase 5: final portfolio proof
+### phase 5: final demo proof
 
 - record a private real-song demo video.
 - capture mobile proof.

@@ -39,7 +39,7 @@ export default function RhymeCanvas({
   const familyById = useMemo(() => new Map(analysis.rhymeFamilies.map((family) => [family.id, family])), [analysis.rhymeFamilies]);
 
   return (
-    <div className={clsx("overflow-hidden", compact ? "max-h-[520px]" : "min-h-[620px]")}>
+    <div className={clsx("overflow-hidden", compact ? "max-h-[440px] sm:max-h-[480px]" : "min-h-[620px]")}>
       <div
         className={clsx(
           "bar-canvas space-y-4 sm:space-y-5",
