@@ -3,8 +3,7 @@
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import type { AnalysisLine, AnalysisWord, RhymeFamily, TrackAnalysis } from "@/lib/analysis/types";
-
-const QUIET_WORDS = new Set(["a", "an", "and", "as", "i", "in", "into", "of", "on", "or", "the", "to", "with"]);
+import { buildRhymeDisplayMap, buildRhymeLineSegments, wordsForLine, type RhymeLineSegment } from "@/lib/rhyme/display";
 
 export default function KaraokeRhymePlayer({
   analysis,
@@ -20,7 +19,7 @@ export default function KaraokeRhymePlayer({
   const wordById = useMemo(() => new Map(analysis.words.map((word) => [word.id, word])), [analysis.words]);
   const familyById = useMemo(() => new Map(analysis.rhymeFamilies.map((family) => [family.id, family])), [analysis.rhymeFamilies]);
   const displayFamilyByWordId = useMemo(
-    () => buildDisplayFamilyMap(analysis.lines, wordById, familyById),
+    () => buildRhymeDisplayMap(analysis.lines, wordById, familyById),
     [analysis.lines, wordById, familyById]
   );
   const activeLineIndex = useMemo(() => getActiveLineIndex(analysis.lines, currentMs), [analysis.lines, currentMs]);
@@ -36,8 +35,9 @@ export default function KaraokeRhymePlayer({
     const containerBox = container.getBoundingClientRect();
     const nodeBox = node.getBoundingClientRect();
     const targetTop = Math.max(container.scrollTop + nodeBox.top - containerBox.top - focusY, 0);
+    const topInset = compact ? 14 : 22;
     container.scrollTo({
-      top: alignToLineStart(targetTop, analysis.lines, lineRefs.current),
+      top: alignToLineStart(targetTop, analysis.lines, lineRefs.current, container, topInset),
       behavior: "smooth"
     });
   }, [activeLineIndex, analysis.lines, compact]);
@@ -60,8 +60,8 @@ export default function KaraokeRhymePlayer({
       >
         <div className="pb-[42vh]">
           {analysis.lines.map((line, index) => {
-            const words = line.wordIds.map((wordId) => wordById.get(wordId)).filter(Boolean) as AnalysisWord[];
-            const segments = buildLineSegments(words, displayFamilyByWordId);
+            const words = wordsForLine(line, wordById);
+            const segments = buildRhymeLineSegments(words, displayFamilyByWordId);
             const active = index === activeLineIndex;
             const past = currentMs > line.endMs + 200;
 
@@ -102,14 +102,6 @@ export default function KaraokeRhymePlayer({
   );
 }
 
-interface LineSegment {
-  family: RhymeFamily | null;
-  words: Array<{
-    word: AnalysisWord;
-    wordIndex: number;
-  }>;
-}
-
 function PhraseSegment({
   activeWordId,
   currentMs,
@@ -117,7 +109,7 @@ function PhraseSegment({
 }: {
   activeWordId: string | null;
   currentMs: number;
-  segment: LineSegment;
+  segment: RhymeLineSegment;
 }) {
   const firstWord = segment.words[0]?.word;
   const lastWord = segment.words.at(-1)?.word;
@@ -230,84 +222,29 @@ function getActiveLineIndex(lines: AnalysisLine[], currentMs: number) {
   return 0;
 }
 
-function alignToLineStart(targetTop: number, lines: AnalysisLine[], refs: Record<string, HTMLElement | null>) {
+function alignToLineStart(
+  targetTop: number,
+  lines: AnalysisLine[],
+  refs: Record<string, HTMLElement | null>,
+  container: HTMLElement,
+  topInset: number
+) {
+  const containerBox = container.getBoundingClientRect();
   const starts = lines
-    .map((line) => refs[line.id]?.offsetTop)
+    .map((line) => {
+      const node = refs[line.id];
+      if (!node) return null;
+      const nodeBox = node.getBoundingClientRect();
+      return container.scrollTop + nodeBox.top - containerBox.top;
+    })
     .filter((offset): offset is number => typeof offset === "number")
     .sort((left, right) => left - right);
   const previous = starts.filter((offset) => offset <= targetTop).at(-1);
-  return previous ?? 0;
+  return Math.max((previous ?? 0) - topInset, 0);
 }
 
 function getActiveWordId(words: AnalysisWord[], currentMs: number) {
   return words.find((word) => currentMs >= word.startMs && currentMs <= word.endMs)?.id || null;
-}
-
-function buildLineSegments(words: AnalysisWord[], displayFamilyByWordId: Map<string, RhymeFamily>) {
-  const segments: LineSegment[] = [];
-
-  words.forEach((word, wordIndex) => {
-    const family = displayFamilyByWordId.get(word.id) || null;
-    const previous = segments.at(-1);
-    if (previous && previous.family?.id === family?.id) {
-      previous.words.push({ word, wordIndex });
-      return;
-    }
-
-    segments.push({
-      family,
-      words: [{ word, wordIndex }]
-    });
-  });
-
-  return segments;
-}
-
-function displayFamily(word: AnalysisWord, familyById: Map<string, RhymeFamily>) {
-  if (QUIET_WORDS.has(word.normalized)) return null;
-  const families = word.rhymeFamilyIds
-    .map((id) => familyById.get(id))
-    .filter((family): family is RhymeFamily => Boolean(family))
-    .filter((family) => family.wordIds.length >= 2 && (family.kind !== "near" || family.wordIds.length >= 4));
-
-  return [...families].sort((left, right) => familyWeight(right) - familyWeight(left))[0] || null;
-}
-
-function buildDisplayFamilyMap(
-  lines: AnalysisLine[],
-  wordById: Map<string, AnalysisWord>,
-  familyById: Map<string, RhymeFamily>
-) {
-  const display = new Map<string, RhymeFamily>();
-
-  for (const line of lines) {
-    const words = line.wordIds.map((wordId) => wordById.get(wordId)).filter(Boolean) as AnalysisWord[];
-    const candidates = words
-      .map((word, wordIndex) => {
-        const family = displayFamily(word, familyById);
-        if (!family) return null;
-
-        const endBonus = wordIndex >= words.length - 2 ? 0.22 : 0;
-        const internalBonus = wordIndex > 0 && wordIndex < words.length - 2 ? 0.08 : 0;
-        const lengthBonus = Math.min(word.normalized.length / 80, 0.08);
-        const score = familyWeight(family) + endBonus + internalBonus + lengthBonus;
-        return { family, score, word };
-      })
-      .filter(Boolean) as Array<{ family: RhymeFamily; score: number; word: AnalysisWord }>;
-
-    const lineBudget = Math.min(5, Math.max(2, Math.ceil(words.length * 0.42)));
-    candidates
-      .sort((left, right) => right.score - left.score)
-      .slice(0, lineBudget)
-      .forEach((candidate) => display.set(candidate.word.id, candidate.family));
-  }
-
-  return display;
-}
-
-function familyWeight(family: RhymeFamily) {
-  const kindWeight = family.kind === "multi" ? 0.38 : family.kind === "end" ? 0.3 : family.kind === "internal" ? 0.16 : 0.04;
-  return family.confidence + kindWeight + family.wordIds.length / 120;
 }
 
 function formatClock(ms: number) {

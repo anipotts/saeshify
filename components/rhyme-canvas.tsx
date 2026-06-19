@@ -1,28 +1,7 @@
 import clsx from "clsx";
 import { useMemo, type CSSProperties } from "react";
 import type { AnalysisLine, AnalysisWord, RhymeFamily, TrackAnalysis } from "@/lib/analysis/types";
-
-const STOP_WORDS = new Set([
-  "a",
-  "an",
-  "and",
-  "as",
-  "every",
-  "i",
-  "in",
-  "into",
-  "of",
-  "on",
-  "only",
-  "or",
-  "the",
-  "through",
-  "to",
-  "what",
-  "when",
-  "while",
-  "with"
-]);
+import { selectRhymeDisplayFamily, visibleRhymeFamiliesForWords, wordsForLine } from "@/lib/rhyme/display";
 
 export default function RhymeCanvas({
   analysis,
@@ -80,12 +59,12 @@ function BarLine({
   line: AnalysisLine;
   wordById: Map<string, AnalysisWord>;
 }) {
-  const words = line.wordIds.map((wordId) => wordById.get(wordId)).filter(Boolean) as AnalysisWord[];
+  const words = wordsForLine(line, wordById);
   const activeLine = currentMs >= line.startMs && currentMs <= line.endMs + 500;
   const pastLine = currentMs > line.endMs + 500;
   const revealedLine = currentMs >= line.startMs;
   const stanzaBreak = index > 0 && index % 4 === 0;
-  const visibleFamilies = uniqueFamilies(words, familyById);
+  const visibleFamilies = visibleRhymeFamiliesForWords(words, familyById);
 
   return (
     <section
@@ -107,7 +86,7 @@ function BarLine({
           <WordToken
             key={word.id}
             activeLine={activeLine}
-            family={selectDisplayFamily(word, familyById)}
+            family={selectRhymeDisplayFamily(word, familyById)}
             revealedLine={revealedLine}
             word={word}
             wordIndex={wordIndex}
@@ -167,39 +146,4 @@ function WordToken({
       </span>
     </span>
   );
-}
-
-function uniqueFamilies(words: AnalysisWord[], familyById: Map<string, RhymeFamily>) {
-  const families = new Map<string, RhymeFamily>();
-  words.forEach((word) => {
-    const family = selectDisplayFamily(word, familyById);
-    if (family) families.set(family.id, family);
-  });
-  return Array.from(families.values());
-}
-
-function selectDisplayFamily(word: AnalysisWord, familyById: Map<string, RhymeFamily>) {
-  const families = word.rhymeFamilyIds
-    .map((id) => familyById.get(id))
-    .filter((family): family is RhymeFamily => Boolean(family))
-    .filter((family) => shouldShowFamily(word, family));
-
-  return [...families].sort((left, right) => familyWeight(right) - familyWeight(left))[0] || null;
-}
-
-function shouldShowFamily(word: AnalysisWord, family: RhymeFamily) {
-  if (STOP_WORDS.has(word.normalized)) return false;
-  if (family.wordIds.length < 2) return false;
-  if (family.kind === "near") {
-    return word.normalized.length >= 4 && family.wordIds.length >= 4;
-  }
-  if (family.kind === "internal") {
-    return family.confidence >= 0.82 && family.wordIds.length >= 3;
-  }
-  return family.confidence >= 0.82;
-}
-
-function familyWeight(family: RhymeFamily) {
-  const kindWeight = family.kind === "end" ? 0.3 : family.kind === "internal" ? 0.18 : 0.05;
-  return family.confidence + kindWeight + family.wordIds.length / 100;
 }
