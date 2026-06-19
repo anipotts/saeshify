@@ -2,6 +2,15 @@ import type { SpotifyNowPlayingResult } from "./types";
 
 let cachedAccessToken: { token: string; expiresAt: number } | null = null;
 
+export function spotifyConfigStatus() {
+  return {
+    configured: Boolean(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET && process.env.SPOTIFY_REFRESH_TOKEN),
+    scope: "user-read-currently-playing",
+    mode: "polling",
+    tokenCached: Boolean(cachedAccessToken)
+  };
+}
+
 export async function getSpotifyNowPlaying(): Promise<SpotifyNowPlayingResult> {
   const accessToken = await getAccessToken();
   if (!accessToken) {

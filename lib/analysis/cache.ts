@@ -25,6 +25,13 @@ export function pipelineVersion() {
   return VERSION;
 }
 
+export function analysisCacheStats() {
+  return {
+    entries: memoryCache.size,
+    pipelineVersion: VERSION
+  };
+}
+
 export function clearAnalysisCache() {
   memoryCache.clear();
 }
