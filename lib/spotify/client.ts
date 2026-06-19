@@ -19,6 +19,14 @@ export async function getSpotifyNowPlaying(): Promise<SpotifyNowPlayingResult> {
     cache: "no-store"
   });
 
+  const result = await parseSpotifyNowPlayingResponse(response);
+  if (!result.ok && result.status === "unauthorized") {
+    cachedAccessToken = null;
+  }
+  return result;
+}
+
+export async function parseSpotifyNowPlayingResponse(response: Response, sampledAt = Date.now()): Promise<SpotifyNowPlayingResult> {
   if (response.status === 204) {
     return {
       ok: false,
@@ -30,7 +38,6 @@ export async function getSpotifyNowPlaying(): Promise<SpotifyNowPlayingResult> {
   }
 
   if (response.status === 401) {
-    cachedAccessToken = null;
     return {
       ok: false,
       status: "unauthorized",
@@ -51,12 +58,12 @@ export async function getSpotifyNowPlaying(): Promise<SpotifyNowPlayingResult> {
   }
 
   if (response.status === 429) {
-    const retryAfter = Number(response.headers.get("retry-after") || "30");
+    const retryAfter = parseRetryAfter(response.headers.get("retry-after"));
     return {
       ok: false,
       status: "rate_limited",
       httpStatus: 429,
-      retryAfterMs: retryAfter * 1000,
+      retryAfterMs: retryAfter,
       message: "spotify rate limited the poller"
     };
   }
@@ -90,7 +97,7 @@ export async function getSpotifyNowPlaying(): Promise<SpotifyNowPlayingResult> {
       progressMs: payload.progress_ms || 0,
       isPlaying: Boolean(payload.is_playing),
       durationMs: item.duration_ms || null,
-      sampledAt: Date.now(),
+      sampledAt,
       source: "spotify",
       device: payload.device
         ? {
@@ -110,6 +117,12 @@ export async function getSpotifyNowPlaying(): Promise<SpotifyNowPlayingResult> {
       artworkUrl: item.album?.images?.[0]?.url
     }
   };
+}
+
+function parseRetryAfter(value: string | null) {
+  const seconds = Number(value || "30");
+  if (!Number.isFinite(seconds) || seconds <= 0) return 30_000;
+  return Math.ceil(seconds * 1000);
 }
 
 async function getAccessToken() {
@@ -143,4 +156,3 @@ async function getAccessToken() {
   };
   return cachedAccessToken.token;
 }
-

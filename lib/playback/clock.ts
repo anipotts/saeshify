@@ -35,12 +35,12 @@ export function reconcilePlayback(serverMs: number, interpolatedMs: number, isPl
   };
 }
 
-export function nextSpotifyPollDelay(status: string, active: boolean) {
-  if (status === "rate_limited") return 30_000;
+export function nextSpotifyPollDelay(status: string, active: boolean, retryAfterMs?: number) {
+  if (status === "rate_limited") return Math.max(retryAfterMs || 30_000, active ? 10_000 : 20_000);
   if (status === "missing_config") return 20_000;
   if (status === "unauthorized") return 15_000;
+  if (status === "forbidden") return 30_000;
   if (status === "no_active_playback") return active ? 6000 : 18_000;
   if (status === "network_error") return 8000;
   return active ? 2200 : 9000;
 }
-
