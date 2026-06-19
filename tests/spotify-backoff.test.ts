@@ -11,6 +11,10 @@ describe("spotify polling policy", () => {
     expect(nextSpotifyPollDelay("missing_config", true)).toBe(20_000);
   });
 
+  it("does not treat upstream spotify errors like healthy polls", () => {
+    expect(nextSpotifyPollDelay("spotify_error", true)).toBe(10_000);
+  });
+
   it("honors spotify retry-after values for rate limits", async () => {
     const result = await parseSpotifyNowPlayingResponse(
       new Response(null, {

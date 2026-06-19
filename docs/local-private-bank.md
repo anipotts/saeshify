@@ -28,6 +28,7 @@ public/local-media/
       "title": "Accordion",
       "artist": "Madvillain",
       "album": "Madvillainy",
+      "isrc": "optional-isrc-for-spotify-matching",
       "durationMs": 129000,
       "bankLabel": "private madvillainy",
       "bankNote": "private local audio plus enhanced lrc",
@@ -40,6 +41,12 @@ public/local-media/
 
 urls can be bare filenames or `/local-media/...` paths. the app keeps them inside
 `/local-media/`.
+
+`spotifyTrackId` can be a local id. if you want private spotify clock sync, add
+an `isrc` when you know it, or keep title, artist, and album accurate enough for
+local matching. open `/instrument?spotify=1` to poll the server-side spotify
+now-playing route and reconcile the local lyric clock against that playback
+snapshot.
 
 for the 10-track Madvillainy private demo scaffold, copy
 `docs/mf-doom-local-bank.template.json` to `public/local-media/manifest.json`,

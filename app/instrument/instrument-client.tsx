@@ -6,6 +6,9 @@ import { ListMusic, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 import KaraokeRhymePlayer from "@/components/karaoke-rhyme-player";
 import { fixtureTracks } from "@/lib/analysis/fixtures";
 import type { TrackAnalysis } from "@/lib/analysis/types";
+import { nextSpotifyPollDelay } from "@/lib/playback/clock";
+import { findSpotifyBankTrack, reconcileSpotifySnapshot } from "@/lib/playback/spotify-sync";
+import type { SpotifyNowPlayingResult } from "@/lib/spotify/types";
 import {
   LOCAL_MANIFEST_URL,
   mergeLocalTracks,
@@ -26,6 +29,7 @@ export default function InstrumentClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [audioBlockedTrackIds, setAudioBlockedTrackIds] = useState<Set<string>>(() => new Set());
   const [audioFailedTrackIds, setAudioFailedTrackIds] = useState<Set<string>>(() => new Set());
+  const [spotifySyncEnabled, setSpotifySyncEnabled] = useState(false);
   const [status, setStatus] = useState("loading");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const displayMsRef = useRef(0);
@@ -39,6 +43,7 @@ export default function InstrumentClient() {
   );
   const canUseLocalAudio = Boolean(
     !selectedTrack.unavailableReason &&
+      !spotifySyncEnabled &&
       selectedTrack.localAudioUrl &&
       !audioFailedTrackIds.has(selectedTrack.spotifyTrackId) &&
       !audioBlockedTrackIds.has(selectedTrack.spotifyTrackId)
@@ -148,10 +153,12 @@ export default function InstrumentClient() {
     loadSongBank().then(async (tracks) => {
       if (cancelled) return;
       const initial = readInitialPlayback(tracks);
+      const shouldSyncSpotify = readSpotifySyncEnabled();
       if (cancelled) return;
       setBankTracks(tracks);
       setSelectedTrackId(initial.track.spotifyTrackId);
       setDisplayMs(initial.startMs);
+      setSpotifySyncEnabled(shouldSyncSpotify);
 
       if (initial.track.unavailableReason) {
         setAnalysis(null);
@@ -177,6 +184,73 @@ export default function InstrumentClient() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!spotifySyncEnabled) return;
+
+    let cancelled = false;
+    let timeout = 0;
+
+    const pollSpotify = async () => {
+      const result = await fetchJson<SpotifyNowPlayingResult>("/api/spotify/now-playing");
+      if (cancelled) return;
+
+      if (!result) {
+        setStatus("spotify poll failed");
+        timeout = window.setTimeout(pollSpotify, nextSpotifyPollDelay("network_error", true));
+        return;
+      }
+
+      if (!result.ok) {
+        setStatus(result.message);
+        if (result.status === "no_active_playback" || result.status === "unauthorized" || result.status === "forbidden") {
+          setIsPlaying(false);
+        }
+        timeout = window.setTimeout(pollSpotify, nextSpotifyPollDelay(result.status, true, result.retryAfterMs));
+        return;
+      }
+
+      const matchedTrack = findSpotifyBankTrack(bankTracks, result.track);
+      if (!matchedTrack) {
+        setIsPlaying(false);
+        setStatus("spotify track outside bank");
+        timeout = window.setTimeout(pollSpotify, nextSpotifyPollDelay("ok", true));
+        return;
+      }
+
+      const nextClock = reconcileSpotifySnapshot(result.snapshot, displayMsRef.current);
+
+      if (matchedTrack.unavailableReason) {
+        setSelectedTrackId(matchedTrack.spotifyTrackId);
+        setDisplayMs(nextClock.positionMs);
+        setAnalysis(null);
+        setIsPlaying(false);
+        setStatus(matchedTrack.unavailableReason);
+        setIsLoading(false);
+        timeout = window.setTimeout(pollSpotify, nextSpotifyPollDelay("ok", true));
+        return;
+      }
+
+      const needsAnalysis = analysis?.track.spotifyTrackId !== matchedTrack.spotifyTrackId;
+      if (needsAnalysis) {
+        await loadTrack(matchedTrack, false, nextClock.positionMs);
+        if (cancelled) return;
+      } else {
+        setDisplayMs(nextClock.positionMs);
+      }
+
+      setIsPlaying(result.snapshot.isPlaying);
+      setStatus("spotify sync");
+      timeout = window.setTimeout(pollSpotify, nextSpotifyPollDelay("ok", true));
+    };
+
+    pollSpotify();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [analysis?.track.spotifyTrackId, bankTracks, loadTrack, spotifySyncEnabled]);
 
   useEffect(() => {
     if (!isPlaying || !analysis || canUseLocalAudio) {
@@ -245,6 +319,7 @@ export default function InstrumentClient() {
 
   const togglePlayback = () => {
     if (!analysis) return;
+    setSpotifySyncEnabled(false);
     setIsPlaying((value) => {
       const next = !value;
       setStatus(next ? statusForPlayback(selectedTrack, canUseLocalAudio) : "paused");
@@ -253,6 +328,7 @@ export default function InstrumentClient() {
   };
 
   const restart = () => {
+    setSpotifySyncEnabled(false);
     if (audioRef.current && canUseLocalAudio) {
       audioRef.current.currentTime = 0;
     }
@@ -290,7 +366,10 @@ export default function InstrumentClient() {
                   trackButtonRefs.current[track.spotifyTrackId] = node;
                 }}
                 onPointerDown={() => primeLocalAudioPlayback(track, true, 0)}
-                onClick={() => loadTrack(track, true)}
+                onClick={() => {
+                  setSpotifySyncEnabled(false);
+                  loadTrack(track, true);
+                }}
                 className={clsxTrackButton(track.spotifyTrackId === selectedTrackId, Boolean(track.unavailableReason))}
                 aria-label={`${track.title} ${track.unavailableReason || track.bankLabel || track.artist}`}
               >
@@ -319,7 +398,7 @@ export default function InstrumentClient() {
             </div>
             <div className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2 text-xs text-white/64">
               <Volume2 size={15} />
-              {audioBadgeLabel(selectedTrack, canUseLocalAudio, audioBlockedTrackIds, audioFailedTrackIds)}
+              {audioBadgeLabel(selectedTrack, canUseLocalAudio, spotifySyncEnabled, audioBlockedTrackIds, audioFailedTrackIds)}
             </div>
           </div>
 
@@ -484,9 +563,11 @@ function statusForPlayback(track: SongBankTrack, canUseAudio: boolean) {
 function audioBadgeLabel(
   track: SongBankTrack,
   canUseAudio: boolean,
+  spotifySyncEnabled: boolean,
   blockedTrackIds: Set<string>,
   failedTrackIds: Set<string>
 ) {
+  if (spotifySyncEnabled) return "spotify";
   if (track.unavailableReason) return "missing lrc";
   if (!track.localAudioUrl) return "clock";
   if (failedTrackIds.has(track.spotifyTrackId)) return "audio missing";
@@ -550,4 +631,11 @@ function readInitialPlayback(tracks: SongBankTrack[]) {
     startMs: params.get("startMs"),
     autoplay: params.get("autoplay")
   });
+}
+
+function readSpotifySyncEnabled() {
+  if (typeof window === "undefined") return false;
+
+  const value = new URLSearchParams(window.location.search).get("spotify");
+  return value === "1" || value === "true";
 }

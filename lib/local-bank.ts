@@ -4,6 +4,7 @@ export const LOCAL_MANIFEST_URL = "/local-media/manifest.json";
 
 export interface LocalBankManifestTrack {
   spotifyTrackId: string;
+  isrc?: string;
   title: string;
   artist: string;
   album?: string;
@@ -55,6 +56,7 @@ export async function resolveLocalManifestTrack(
 
   return {
     spotifyTrackId: track.spotifyTrackId,
+    isrc: track.isrc,
     title: track.title,
     artist: track.artist,
     album: track.album,

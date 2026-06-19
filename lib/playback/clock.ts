@@ -42,5 +42,6 @@ export function nextSpotifyPollDelay(status: string, active: boolean, retryAfter
   if (status === "forbidden") return 30_000;
   if (status === "no_active_playback") return active ? 6000 : 18_000;
   if (status === "network_error") return 8000;
+  if (status === "spotify_error") return 10_000;
   return active ? 2200 : 9000;
 }

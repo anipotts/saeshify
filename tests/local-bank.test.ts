@@ -44,6 +44,7 @@ describe("local bank", () => {
     const track = await resolveLocalManifestTrack(
       {
         spotifyTrackId: "local-inline",
+        isrc: "USST10400001",
         title: "private song",
         artist: "private artist",
         audioUrl: "audio.wav",
@@ -56,6 +57,7 @@ describe("local bank", () => {
     expect(readText).not.toHaveBeenCalled();
     expect(track?.localAudioUrl).toBe("/local-media/audio.wav");
     expect(track?.lrcUrl).toBe("/local-media/lyrics.lrc");
+    expect(track?.isrc).toBe("USST10400001");
     expect(track?.lrc).toContain("inline line");
   });
 
