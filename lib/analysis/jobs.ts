@@ -9,6 +9,12 @@ export interface AnalysisJobInput {
   requestedAdapters?: AnalysisAdapterKind[];
 }
 
+export interface EnqueueAnalysisJobOptions {
+  id?: string;
+  now?: Date;
+  reuseExisting?: boolean;
+}
+
 export interface AnalysisJob {
   id: string;
   status: AnalysisJobStatus;
@@ -42,15 +48,21 @@ export interface PublicAnalysisJob {
 const DEFAULT_ADAPTERS: AnalysisAdapterKind[] = ["fixture", "lrclib", "local-worker"];
 const jobs = new Map<string, AnalysisJob>();
 const jobInputs = new Map<string, AnalysisJobInput>();
+const jobFingerprints = new Map<string, string>();
+const processingJobs = new Map<string, Promise<AnalysisJob | null>>();
 let jobSequence = 0;
 
-export function enqueueAnalysisJob(
-  input: AnalysisJobInput,
-  options: { id?: string; now?: Date } = {}
-): AnalysisJob {
+export function enqueueAnalysisJob(input: AnalysisJobInput, options: EnqueueAnalysisJobOptions = {}): AnalysisJob {
   const now = toIso(options.now);
   const sourceVersion = analysisSourceVersion(input.track);
   const requestedAdapters = input.requestedAdapters?.length ? input.requestedAdapters : DEFAULT_ADAPTERS;
+  const fingerprint = analysisJobFingerprint(input.track.spotifyTrackId, sourceVersion, requestedAdapters);
+  const reusableId = options.reuseExisting ? jobFingerprints.get(fingerprint) : null;
+  const reusableJob = reusableId ? jobs.get(reusableId) : null;
+  if (reusableJob && reusableJob.status !== "failed") {
+    return reusableJob;
+  }
+
   const cached = getCachedAnalysis(input.track.spotifyTrackId, sourceVersion);
   const job: AnalysisJob = {
     id: options.id || nextJobId(),
@@ -67,10 +79,22 @@ export function enqueueAnalysisJob(
 
   jobs.set(job.id, job);
   jobInputs.set(job.id, { track: input.track, requestedAdapters });
+  jobFingerprints.set(fingerprint, job.id);
   return job;
 }
 
 export async function processAnalysisJob(id: string, options: { now?: Date } = {}) {
+  const active = processingJobs.get(id);
+  if (active) return active;
+
+  const promise = processAnalysisJobOnce(id, options).finally(() => {
+    processingJobs.delete(id);
+  });
+  processingJobs.set(id, promise);
+  return promise;
+}
+
+async function processAnalysisJobOnce(id: string, options: { now?: Date } = {}) {
   const job = jobs.get(id);
   const input = jobInputs.get(id);
   if (!job || !input) return null;
@@ -144,6 +168,8 @@ export function publicAnalysisJob(job: AnalysisJob, options: { includeResult?: b
 export function clearAnalysisJobs() {
   jobs.clear();
   jobInputs.clear();
+  jobFingerprints.clear();
+  processingJobs.clear();
   jobSequence = 0;
 }
 
@@ -159,4 +185,8 @@ function toIso(date = new Date()) {
 function nextJobId() {
   jobSequence += 1;
   return `analysis-job-${jobSequence.toString().padStart(4, "0")}`;
+}
+
+function analysisJobFingerprint(trackId: string, sourceVersion: string, adapters: AnalysisAdapterKind[]) {
+  return [trackId, sourceVersion, [...adapters].sort().join("+")].join(":");
 }

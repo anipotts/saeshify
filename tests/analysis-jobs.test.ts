@@ -60,6 +60,33 @@ describe("analysis jobs", () => {
     expect(second.result).toBe(processed?.result);
   });
 
+  it("can reuse an equivalent in-flight job instead of creating duplicates", () => {
+    const track = makeTrack("job-reuse", "[00:00.00] reuse line one\n[00:03.00] reuse line two");
+    const first = enqueueAnalysisJob(
+      { track, requestedAdapters: ["fixture"] },
+      { id: "job-reuse-a", reuseExisting: true }
+    );
+    const second = enqueueAnalysisJob(
+      { track, requestedAdapters: ["fixture"] },
+      { id: "job-reuse-b", reuseExisting: true }
+    );
+
+    expect(second).toBe(first);
+    expect(second.id).toBe("job-reuse-a");
+    expect(analysisJobStats().total).toBe(1);
+  });
+
+  it("coalesces concurrent processing for the same job", async () => {
+    const track = makeTrack("job-race", "[00:00.00] race line one\n[00:03.00] race line two");
+    const job = enqueueAnalysisJob({ track, requestedAdapters: ["fixture"] }, { id: "job-race" });
+
+    const [first, second] = await Promise.all([processAnalysisJob(job.id), processAnalysisJob(job.id)]);
+
+    expect(first).toBe(second);
+    expect(first?.status).toBe("completed");
+    expect(first?.attempts).toBe(1);
+  });
+
   it("marks jobs failed when every requested adapter rejects", async () => {
     const job = enqueueAnalysisJob(
       { track: makeTrack("job-fail"), requestedAdapters: ["lrclib"] },

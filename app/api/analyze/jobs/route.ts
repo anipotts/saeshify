@@ -59,10 +59,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const job = enqueueAnalysisJob({
-    track: parsed.data.track || fixtureTracks[0],
-    requestedAdapters: parsed.data.requestedAdapters
-  });
+  const job = enqueueAnalysisJob(
+    {
+      track: parsed.data.track || fixtureTracks[0],
+      requestedAdapters: parsed.data.requestedAdapters
+    },
+    { reuseExisting: true }
+  );
 
   const next = parsed.data.processNow === false ? job : await processAnalysisJob(job.id);
   return NextResponse.json(
