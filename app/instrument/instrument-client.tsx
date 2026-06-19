@@ -30,6 +30,7 @@ export default function InstrumentClient() {
   const displayMsRef = useRef(0);
   const lastTickRef = useRef<number | null>(null);
   const lyricRegionRef = useRef<HTMLElement | null>(null);
+  const trackButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const selectedTrack = useMemo(
     () => bankTracks.find((track) => track.spotifyTrackId === selectedTrackId) || bankTracks[0] || fixtureTracks[0],
@@ -44,6 +45,11 @@ export default function InstrumentClient() {
   useEffect(() => {
     displayMsRef.current = displayMs;
   }, [displayMs]);
+
+  useEffect(() => {
+    const node = trackButtonRefs.current[selectedTrackId];
+    node?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [selectedTrackId, bankTracks.length]);
 
   const primeLocalAudioPlayback = useCallback((track: FixtureTrack, shouldPlay: boolean, startMs: number) => {
     const audio = audioRef.current;
@@ -236,7 +242,7 @@ export default function InstrumentClient() {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#121212] pb-32 text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#121212] pb-[124px] text-white sm:pb-32">
       <header className="border-b border-white/10 bg-black px-4 py-4 sm:px-6">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4">
           <Link href="/" className="text-lg font-black tracking-normal">
@@ -249,9 +255,9 @@ export default function InstrumentClient() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-[1500px] min-w-0 gap-4 px-3 py-4 sm:px-5 lg:grid-cols-[310px_1fr]">
-        <aside className="min-w-0 overflow-hidden rounded-lg bg-[#181818] p-3 lg:min-h-[calc(100vh-190px)]">
-          <div className="mb-3 flex items-center gap-2 px-2 text-sm font-black text-white">
+      <section className="mx-auto grid max-w-[1500px] min-w-0 gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-4 lg:grid-cols-[310px_1fr]">
+        <aside className="min-w-0 overflow-hidden rounded-lg bg-[#181818] p-2.5 sm:p-3 lg:min-h-[calc(100vh-190px)]">
+          <div className="mb-2.5 flex items-center gap-2 px-2 text-sm font-black text-white sm:mb-3">
             <ListMusic size={18} /> tracks
           </div>
           <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 lg:grid-cols-1 lg:overflow-visible lg:pb-0">
@@ -259,6 +265,9 @@ export default function InstrumentClient() {
               <button
                 key={track.spotifyTrackId}
                 type="button"
+                ref={(node) => {
+                  trackButtonRefs.current[track.spotifyTrackId] = node;
+                }}
                 onPointerDown={() => primeLocalAudioPlayback(track, true, 0)}
                 onClick={() => loadTrack(track, true)}
                 className={clsxTrackButton(track.spotifyTrackId === selectedTrackId)}
@@ -277,9 +286,11 @@ export default function InstrumentClient() {
 
         <section ref={lyricRegionRef} className="min-w-0 scroll-mt-3">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3 px-1">
-            <div>
+            <div className="min-w-0">
               <p className="mono text-[11px] uppercase text-[var(--spotify)]">{selectedTrack.bankNote || "local demo"}</p>
-              <h1 className="mt-1 text-3xl font-black leading-none text-white sm:text-5xl">{selectedTrack.title}</h1>
+              <h1 className="mt-1 max-w-full truncate text-[2rem] font-black leading-none text-white sm:whitespace-normal sm:text-5xl">
+                {selectedTrack.title}
+              </h1>
               <p className="mt-2 text-sm text-white/55">{selectedTrack.album || selectedTrack.bankLabel || selectedTrack.artist}</p>
             </div>
             <div className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2 text-xs text-white/64">
@@ -316,8 +327,8 @@ export default function InstrumentClient() {
         </section>
       </section>
 
-      <footer className="fixed inset-x-0 bottom-0 border-t border-white/10 bg-black px-4 py-3 text-white sm:px-6">
-        <div className="mx-auto grid max-w-[1500px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <footer className="fixed inset-x-0 bottom-0 border-t border-white/10 bg-black px-4 py-2.5 text-white sm:px-6 sm:py-3">
+        <div className="mx-auto grid max-w-[1500px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           <div className="min-w-0">
             <div className="truncate text-sm font-bold">{selectedTrack.title}</div>
             <div className="truncate text-xs text-white/50">{selectedTrack.artist}</div>
@@ -344,7 +355,7 @@ export default function InstrumentClient() {
             </button>
           </div>
 
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
+          <div className="col-span-2 grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:col-span-1">
             <span className="mono text-[11px] text-white/45">{formatClock(displayMs)}</span>
             <input
               type="range"
@@ -375,7 +386,7 @@ export default function InstrumentClient() {
 
 function clsxTrackButton(active: boolean) {
   return [
-    "flex min-w-[220px] items-center gap-3 rounded-md p-2 transition-colors lg:min-w-0",
+    "flex min-w-[168px] items-center gap-2.5 rounded-md p-2 transition-colors sm:min-w-0 sm:gap-3 lg:min-w-0",
     active ? "bg-[#2a2a2a]" : "bg-transparent hover:bg-white/8"
   ].join(" ");
 }
