@@ -4,20 +4,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ListMusic, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 import KaraokeRhymePlayer from "@/components/karaoke-rhyme-player";
-import { fixtureTracks, type FixtureTrack } from "@/lib/analysis/fixtures";
+import { fixtureTracks } from "@/lib/analysis/fixtures";
 import type { TrackAnalysis } from "@/lib/analysis/types";
 import {
   LOCAL_MANIFEST_URL,
   mergeLocalTracks,
   resolveInitialPlayback,
   resolveLocalManifestTracks,
-  type LocalBankManifest
+  type LocalBankManifest,
+  type SongBankTrack
 } from "@/lib/local-bank";
 
 const INITIAL_TRACK_ID = fixtureTracks[0].spotifyTrackId;
 
 export default function InstrumentClient() {
-  const [bankTracks, setBankTracks] = useState<FixtureTrack[]>(fixtureTracks);
+  const [bankTracks, setBankTracks] = useState<SongBankTrack[]>(fixtureTracks);
   const [selectedTrackId, setSelectedTrackId] = useState(INITIAL_TRACK_ID);
   const [analysis, setAnalysis] = useState<TrackAnalysis | null>(null);
   const [displayMs, setDisplayMs] = useState(0);
@@ -37,7 +38,8 @@ export default function InstrumentClient() {
     [bankTracks, selectedTrackId]
   );
   const canUseLocalAudio = Boolean(
-    selectedTrack.localAudioUrl &&
+    !selectedTrack.unavailableReason &&
+      selectedTrack.localAudioUrl &&
       !audioFailedTrackIds.has(selectedTrack.spotifyTrackId) &&
       !audioBlockedTrackIds.has(selectedTrack.spotifyTrackId)
   );
@@ -51,9 +53,9 @@ export default function InstrumentClient() {
     node?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
   }, [selectedTrackId, bankTracks.length]);
 
-  const primeLocalAudioPlayback = useCallback((track: FixtureTrack, shouldPlay: boolean, startMs: number) => {
+  const primeLocalAudioPlayback = useCallback((track: SongBankTrack, shouldPlay: boolean, startMs: number) => {
     const audio = audioRef.current;
-    if (!audio || !track.localAudioUrl || audioFailedTrackIds.has(track.spotifyTrackId)) return;
+    if (!audio || track.unavailableReason || !track.localAudioUrl || audioFailedTrackIds.has(track.spotifyTrackId)) return;
     setAudioBlockedTrackIds((previous) => deleteFromSet(previous, track.spotifyTrackId));
 
     if (audio.dataset.trackId !== track.spotifyTrackId) {
@@ -77,12 +79,21 @@ export default function InstrumentClient() {
     }
   }, [audioFailedTrackIds]);
 
-  const loadTrack = useCallback(async (track: FixtureTrack, shouldPlay = true, startMs = 0) => {
+  const loadTrack = useCallback(async (track: SongBankTrack, shouldPlay = true, startMs = 0) => {
     setIsLoading(true);
-    setStatus("loading analysis");
     setSelectedTrackId(track.spotifyTrackId);
     setDisplayMs(startMs);
     lastTickRef.current = null;
+
+    if (track.unavailableReason) {
+      setAnalysis(null);
+      setIsPlaying(false);
+      setStatus(track.unavailableReason);
+      setIsLoading(false);
+      return;
+    }
+
+    setStatus("loading analysis");
     primeLocalAudioPlayback(track, shouldPlay, startMs);
 
     const next = await fetchTrackAnalysis(track);
@@ -114,7 +125,7 @@ export default function InstrumentClient() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (!selectedTrack.localAudioUrl) {
+    if (selectedTrack.unavailableReason || !selectedTrack.localAudioUrl) {
       audio.pause();
       audio.removeAttribute("src");
       delete audio.dataset.trackId;
@@ -129,7 +140,7 @@ export default function InstrumentClient() {
       audio.load();
       seekAudioWhenReady(audio, displayMsRef.current);
     }
-  }, [selectedTrack.localAudioUrl, selectedTrack.spotifyTrackId]);
+  }, [selectedTrack.localAudioUrl, selectedTrack.spotifyTrackId, selectedTrack.unavailableReason]);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,11 +148,21 @@ export default function InstrumentClient() {
     loadSongBank().then(async (tracks) => {
       if (cancelled) return;
       const initial = readInitialPlayback(tracks);
-      const next = await fetchTrackAnalysis(initial.track);
       if (cancelled) return;
       setBankTracks(tracks);
       setSelectedTrackId(initial.track.spotifyTrackId);
       setDisplayMs(initial.startMs);
+
+      if (initial.track.unavailableReason) {
+        setAnalysis(null);
+        setIsPlaying(false);
+        setStatus(initial.track.unavailableReason);
+        setIsLoading(false);
+        return;
+      }
+
+      const next = await fetchTrackAnalysis(initial.track);
+      if (cancelled) return;
       if (next.analysis) {
         setAnalysis(next.analysis);
         setIsPlaying(initial.autoplay);
@@ -270,14 +291,17 @@ export default function InstrumentClient() {
                 }}
                 onPointerDown={() => primeLocalAudioPlayback(track, true, 0)}
                 onClick={() => loadTrack(track, true)}
-                className={clsxTrackButton(track.spotifyTrackId === selectedTrackId)}
+                className={clsxTrackButton(track.spotifyTrackId === selectedTrackId, Boolean(track.unavailableReason))}
+                aria-label={`${track.title} ${track.unavailableReason || track.bankLabel || track.artist}`}
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-[#282828] text-sm font-black text-[var(--spotify)]">
                   {`${index + 1}`.padStart(2, "0")}
                 </span>
                 <span className="min-w-0 text-left">
                   <span className="block truncate text-sm font-bold text-white">{track.title}</span>
-                  <span className="mt-0.5 block truncate text-xs text-white/52">{track.bankLabel || track.artist}</span>
+                  <span className="mt-0.5 block truncate text-xs text-white/52">
+                    {track.unavailableReason || track.bankLabel || track.artist}
+                  </span>
                 </span>
               </button>
             ))}
@@ -321,7 +345,14 @@ export default function InstrumentClient() {
             <KaraokeRhymePlayer analysis={analysis} currentMs={displayMs} />
           ) : (
             <div className="flex min-h-[560px] items-center justify-center rounded border border-white/10 bg-[#d9d9d9] text-sm text-black/55">
-              {isLoading ? "loading analysis" : "analysis unavailable"}
+              <div className="px-6 text-center">
+                <div className="text-base font-black text-black/70">{isLoading ? "loading analysis" : "analysis unavailable"}</div>
+                {!isLoading ? (
+                  <div className="mono mt-2 text-[11px] uppercase tracking-normal text-black/45">
+                    {selectedTrack.unavailableReason || "no timed word stream"}
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
         </section>
@@ -384,9 +415,10 @@ export default function InstrumentClient() {
   );
 }
 
-function clsxTrackButton(active: boolean) {
+function clsxTrackButton(active: boolean, unavailable = false) {
   return [
     "flex min-w-[168px] items-center gap-2.5 rounded-md p-2 transition-colors sm:min-w-0 sm:gap-3 lg:min-w-0",
+    unavailable ? "opacity-55" : "opacity-100",
     active ? "bg-[#2a2a2a]" : "bg-transparent hover:bg-white/8"
   ].join(" ");
 }
@@ -403,7 +435,9 @@ interface AnalysisLoadResult {
   jobStatus?: string;
 }
 
-async function fetchTrackAnalysis(track: FixtureTrack): Promise<AnalysisLoadResult> {
+async function fetchTrackAnalysis(track: SongBankTrack): Promise<AnalysisLoadResult> {
+  if (track.unavailableReason) return { analysis: null };
+
   const jobResponse = await fetch("/api/analyze/jobs", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -442,16 +476,18 @@ async function fetchTrackAnalysis(track: FixtureTrack): Promise<AnalysisLoadResu
   return { analysis: (await response.json()) as TrackAnalysis };
 }
 
-function statusForPlayback(track: FixtureTrack, canUseAudio: boolean) {
+function statusForPlayback(track: SongBankTrack, canUseAudio: boolean) {
+  if (track.unavailableReason) return track.unavailableReason;
   return track.localAudioUrl && canUseAudio ? "playing audio" : "playing clock";
 }
 
 function audioBadgeLabel(
-  track: FixtureTrack,
+  track: SongBankTrack,
   canUseAudio: boolean,
   blockedTrackIds: Set<string>,
   failedTrackIds: Set<string>
 ) {
+  if (track.unavailableReason) return "missing lrc";
   if (!track.localAudioUrl) return "clock";
   if (failedTrackIds.has(track.spotifyTrackId)) return "audio missing";
   if (blockedTrackIds.has(track.spotifyTrackId)) return "clock";
@@ -472,7 +508,7 @@ function deleteFromSet<T>(set: Set<T>, item: T) {
   return next;
 }
 
-async function loadSongBank(): Promise<FixtureTrack[]> {
+async function loadSongBank(): Promise<SongBankTrack[]> {
   const manifest = await fetchJson<LocalBankManifest>(LOCAL_MANIFEST_URL);
   const localTracks = await resolveLocalManifestTracks(manifest, fetchText);
   return mergeLocalTracks(localTracks);
@@ -503,7 +539,7 @@ function seekAudioWhenReady(audio: HTMLAudioElement, startMs: number) {
   audio.addEventListener("loadedmetadata", seek, { once: true });
 }
 
-function readInitialPlayback(tracks: FixtureTrack[]) {
+function readInitialPlayback(tracks: SongBankTrack[]) {
   if (typeof window === "undefined") {
     return resolveInitialPlayback(tracks);
   }

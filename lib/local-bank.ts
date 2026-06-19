@@ -21,6 +21,10 @@ export interface LocalBankManifest {
   tracks?: LocalBankManifestTrack[];
 }
 
+export interface SongBankTrack extends FixtureTrack {
+  unavailableReason?: string;
+}
+
 export interface InitialPlaybackInput {
   requestedTrackId?: string | null;
   startMs?: number | string | null;
@@ -36,19 +40,18 @@ export async function resolveLocalManifestTracks(
   if (!manifest?.tracks?.length) return [];
 
   const tracks = await Promise.all(manifest.tracks.map((track) => resolveLocalManifestTrack(track, readText)));
-  return tracks.filter((track): track is FixtureTrack => Boolean(track));
+  return tracks.filter((track): track is SongBankTrack => Boolean(track));
 }
 
 export async function resolveLocalManifestTrack(
   track: LocalBankManifestTrack,
   readText: LocalTextFetcher = fetchLocalText
-): Promise<FixtureTrack | null> {
+): Promise<SongBankTrack | null> {
   if (!track.spotifyTrackId || !track.title || !track.artist) return null;
 
   const lrcUrl = normalizeLocalMediaUrl(track.lrcUrl);
   const localAudioUrl = normalizeLocalMediaUrl(track.localAudioUrl || track.audioUrl);
   const lrc = track.lrc || (lrcUrl ? await readText(lrcUrl) : null);
-  if (!lrc?.trim()) return null;
 
   return {
     spotifyTrackId: track.spotifyTrackId,
@@ -58,14 +61,15 @@ export async function resolveLocalManifestTrack(
     durationMs: track.durationMs,
     artworkUrl: track.artworkUrl,
     bankLabel: track.bankLabel || "private local",
-    bankNote: track.bankNote || "private local lrc",
+    bankNote: track.bankNote || (lrc?.trim() ? "private local lrc" : "missing local lrc"),
     localAudioUrl,
     lrcUrl,
-    lrc
+    lrc: lrc || "",
+    unavailableReason: lrc?.trim() ? undefined : unavailableReasonForTrack(lrcUrl)
   };
 }
 
-export function mergeLocalTracks(localTracks: FixtureTrack[], publicTracks: FixtureTrack[] = fixtureTracks) {
+export function mergeLocalTracks(localTracks: SongBankTrack[], publicTracks: FixtureTrack[] = fixtureTracks): SongBankTrack[] {
   if (localTracks.length === 0) return publicTracks;
 
   const localIds = new Set(localTracks.map((track) => track.spotifyTrackId));
@@ -80,14 +84,20 @@ export function normalizeLocalMediaUrl(value?: string) {
   return `/local-media/${trimmed.replace(/^local-media\//, "")}`;
 }
 
-export function resolveInitialPlayback(tracks: FixtureTrack[], input: InitialPlaybackInput = {}) {
-  const track =
-    tracks.find((candidate) => candidate.spotifyTrackId === input.requestedTrackId) || tracks[0] || fixtureTracks[0];
+export function resolveInitialPlayback(tracks: SongBankTrack[], input: InitialPlaybackInput = {}) {
+  const requestedTrack = tracks.find((candidate) => candidate.spotifyTrackId === input.requestedTrackId);
+  const firstPlayableTrack =
+    tracks.find((candidate) => !(candidate as SongBankTrack).unavailableReason) || tracks[0] || fixtureTracks[0];
+  const track = requestedTrack || firstPlayableTrack;
   const parsedStartMs = Number(input.startMs || 0);
   const startMs = Number.isFinite(parsedStartMs) ? Math.max(0, parsedStartMs) : 0;
   const autoplay = input.autoplay === true || input.autoplay === "1" || input.autoplay === "true";
 
   return { track, startMs, autoplay };
+}
+
+function unavailableReasonForTrack(lrcUrl?: string) {
+  return lrcUrl ? `missing lrc ${lrcUrl}` : "missing lrc";
 }
 
 async function fetchLocalText(url: string) {

@@ -16,11 +16,26 @@ describe("local bank", () => {
     expect(normalizeLocalMediaUrl("https://example.com/private.wav")).toBe("https://example.com/private.wav");
   });
 
-  it("rejects manifest tracks without identity or lrc content", async () => {
+  it("rejects manifest tracks without identity", async () => {
     const readText = vi.fn(async () => null);
 
     await expect(resolveLocalManifestTrack({ spotifyTrackId: "", title: "x", artist: "y" }, readText)).resolves.toBeNull();
-    await expect(resolveLocalManifestTrack({ spotifyTrackId: "x", title: "x", artist: "y" }, readText)).resolves.toBeNull();
+  });
+
+  it("keeps manifest tracks with missing lrc as unavailable rows", async () => {
+    const readText = vi.fn(async () => null);
+
+    const track = await resolveLocalManifestTrack(
+      { spotifyTrackId: "missing-lrc", title: "private song", artist: "private artist", lrcUrl: "missing.lrc" },
+      readText
+    );
+
+    expect(track).toMatchObject({
+      spotifyTrackId: "missing-lrc",
+      lrc: "",
+      unavailableReason: "missing lrc /local-media/missing.lrc",
+      bankNote: "missing local lrc"
+    });
   });
 
   it("prefers inline lrc and skips network reads", async () => {
@@ -62,18 +77,20 @@ describe("local bank", () => {
     expect(track?.lrc).toContain("fetched line");
   });
 
-  it("filters invalid manifest rows", async () => {
+  it("filters invalid manifest rows but keeps unavailable local rows visible", async () => {
     const tracks = await resolveLocalManifestTracks(
       {
         tracks: [
           { spotifyTrackId: "valid", title: "valid", artist: "artist", lrc: "[00:00.00] line" },
-          { spotifyTrackId: "missing-lrc", title: "missing", artist: "artist" }
+          { spotifyTrackId: "missing-lrc", title: "missing", artist: "artist" },
+          { spotifyTrackId: "", title: "invalid", artist: "artist" }
         ]
       },
       async () => null
     );
 
-    expect(tracks.map((track) => track.spotifyTrackId)).toEqual(["valid"]);
+    expect(tracks.map((track) => track.spotifyTrackId)).toEqual(["valid", "missing-lrc"]);
+    expect(tracks[1].unavailableReason).toBe("missing lrc");
   });
 
   it("keeps local tracks ahead of public fixtures and removes duplicates", () => {
@@ -95,6 +112,20 @@ describe("local bank", () => {
       track: tracks[0],
       startMs: 0,
       autoplay: false
+    });
+  });
+
+  it("defaults to the first playable track when local manifest rows are unavailable", () => {
+    const unavailable = { ...makeFixture("missing-lrc", "missing"), unavailableReason: "missing lrc" };
+    const playable = makeFixture("fixture", "fixture");
+
+    expect(resolveInitialPlayback([unavailable, playable], {})).toMatchObject({
+      track: playable,
+      startMs: 0,
+      autoplay: false
+    });
+    expect(resolveInitialPlayback([unavailable, playable], { requestedTrackId: "missing-lrc" })).toMatchObject({
+      track: unavailable
     });
   });
 });
