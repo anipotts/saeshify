@@ -40,24 +40,46 @@ export function buildRhymeDisplayMap(
 
   for (const line of lines) {
     const words = wordsForLine(line, wordById);
-    const candidates = words
-      .map((word, wordIndex) => {
-        const family = selectRhymeDisplayFamily(word, familyById);
-        if (!family) return null;
+    const candidatesByFamily = new Map<
+      string,
+      {
+        family: RhymeFamily;
+        score: number;
+        words: AnalysisWord[];
+      }
+    >();
 
-        const endBonus = wordIndex >= words.length - 2 ? 0.22 : 0;
-        const internalBonus = wordIndex > 0 && wordIndex < words.length - 2 ? 0.08 : 0;
-        const lengthBonus = Math.min(word.normalized.length / 80, 0.08);
-        const score = rhymeFamilyWeight(family) + endBonus + internalBonus + lengthBonus;
-        return { family, score, word };
-      })
-      .filter((candidate): candidate is { family: RhymeFamily; score: number; word: AnalysisWord } => Boolean(candidate));
+    words.forEach((word, wordIndex) => {
+      const family = selectRhymeDisplayFamily(word, familyById);
+      if (!family) return;
 
-    const lineBudget = Math.min(5, Math.max(2, Math.ceil(words.length * 0.42)));
-    candidates
+      const endBonus = wordIndex >= words.length - 2 ? 0.22 : 0;
+      const internalBonus = wordIndex > 0 && wordIndex < words.length - 2 ? 0.08 : 0;
+      const lengthBonus = Math.min(word.normalized.length / 80, 0.08);
+      const phraseBonus = Math.min(family.wordIds.length / 90, 0.12);
+      const score = rhymeFamilyWeight(family) + endBonus + internalBonus + lengthBonus + phraseBonus;
+      const candidate = candidatesByFamily.get(family.id);
+
+      if (candidate) {
+        candidate.score = Math.max(candidate.score, score);
+        candidate.words.push(word);
+        return;
+      }
+
+      candidatesByFamily.set(family.id, {
+        family,
+        score,
+        words: [word]
+      });
+    });
+
+    const familyBudget = Math.min(5, Math.max(2, Math.ceil(words.length * 0.42)));
+    Array.from(candidatesByFamily.values())
       .sort((left, right) => right.score - left.score)
-      .slice(0, lineBudget)
-      .forEach((candidate) => display.set(candidate.word.id, candidate.family));
+      .slice(0, familyBudget)
+      .forEach((candidate) => {
+        candidate.words.forEach((word) => display.set(word.id, candidate.family));
+      });
   }
 
   return display;

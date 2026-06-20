@@ -66,7 +66,7 @@ export default function KaraokeRhymePlayer({
         ref={scrollRef}
         className={clsx(
           "karaoke-scroll overflow-x-hidden overflow-y-auto scroll-smooth px-4 py-4 sm:px-7 sm:py-6",
-          compact ? "h-[590px]" : "h-[clamp(292px,calc(100dvh-470px),390px)] sm:h-[calc(100vh-206px)] sm:min-h-[560px]"
+          compact ? "h-[590px]" : "h-[clamp(292px,calc(100dvh-495px),390px)] sm:h-[clamp(430px,calc(100vh-326px),640px)]"
         )}
       >
         <div className="pb-[42vh]">

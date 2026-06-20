@@ -52,6 +52,35 @@ describe("rhyme display model", () => {
     expect(display.size).toBe(5);
   });
 
+  it("keeps selected phrase families intact on crowded bars", () => {
+    const line: AnalysisLine = {
+      id: "l1",
+      text: "low slow glow one two three four five six ten",
+      startMs: 0,
+      endMs: 4000,
+      wordIds: Array.from({ length: 10 }, (_, index) => `w${index}`)
+    };
+    const words = [
+      makeWord("w0", "low", ["multi"]),
+      makeWord("w1", "slow", ["multi"]),
+      makeWord("w2", "glow", ["multi"]),
+      ...line.wordIds.slice(3).map((id, index) => makeWord(id, `word${index}`, [`r${index}`]))
+    ];
+    const wordById = new Map(words.map((word) => [word.id, word]));
+    const familyById = new Map<string, RhymeFamily>([
+      ["multi", makeFamily("multi", "multi", ["w0", "w1", "w2"], 0.94)],
+      ...line.wordIds
+        .slice(3)
+        .map<[string, RhymeFamily]>((id, index) => [`r${index}`, makeFamily(`r${index}`, "end", [id, `x${index}`], 0.94)])
+    ]);
+
+    const display = buildRhymeDisplayMap([line], wordById, familyById);
+    const segments = buildRhymeLineSegments(words, display);
+
+    expect(["w0", "w1", "w2"].map((id) => display.get(id)?.id)).toEqual(["multi", "multi", "multi"]);
+    expect(segments[0].words.map(({ word }) => word.text)).toEqual(["low", "slow", "glow"]);
+  });
+
   it("anchors auto-scroll on a whole context line above the active bar", () => {
     expect(scrollAnchorLineIndex(7, 20, 3)).toBe(4);
     expect(scrollAnchorLineIndex(1, 20, 3)).toBe(0);
