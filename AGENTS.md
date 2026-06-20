@@ -9,8 +9,7 @@ to the clock.
 
 ## positioning
 
-- present saeshify as its own instrument, not a case study, explainer page, or
-  commercial music app.
+- present saeshify as its own instrument.
 - use this one-liner: `live rhyme instrumentation for spotify playback clocks.`
 - public copy should be sparse: name, one-liner, instrument, source.
 - technical docs can mention playback clocks, polling, drift correction, queues,

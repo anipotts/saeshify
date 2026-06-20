@@ -7,7 +7,7 @@ and renders a Spited-style rhyme layer in sync.
 
 ## current status
 
-- public repo: fixture-safe demo data only.
+- source repo: fixture-safe demo data only.
 - private local demo: supports real song assets under ignored `public/local-media/`.
 - target sample space: Madvillainy, the 2004 Madvillain album, plus a few adjacent
   MF DOOM tracks for stress testing dense rhyme schemes.
@@ -87,7 +87,7 @@ saeshify is clock in, timed words through, rhyme layer out.
 - running multiple timing and lyric analysis paths behind one schema.
 - caching analyses by track and source version.
 - rendering bar-level rhyme families with word-level active timing.
-- keeping public github clean while supporting private real-song demos.
+- keeping source clean while supporting private real-song demos.
 
 ## docs
 

@@ -56,7 +56,7 @@ export default function KaraokeRhymePlayer({
   }, [activeLineIndex, analysis.lines, compact]);
 
   return (
-    <section className="overflow-hidden rounded-[4px] border border-black bg-[#d9d9d9]">
+    <section className="overflow-hidden rounded-[4px] border border-black bg-[#d9d9d9]" data-rhyme-sheet>
       <div className="flex h-9 items-center justify-between bg-black px-4 text-white">
         <span className="truncate pr-4 text-[12px] font-black uppercase leading-none">
           {analysis.track.artist} - {analysis.track.title}

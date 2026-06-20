@@ -31,6 +31,7 @@ export default function InstrumentClient() {
   const [audioFailedTrackIds, setAudioFailedTrackIds] = useState<Set<string>>(() => new Set());
   const [spotifySyncEnabled, setSpotifySyncEnabled] = useState(false);
   const [inspectMode, setInspectMode] = useState(false);
+  const [analysisJob, setAnalysisJob] = useState<AnalysisJobSummary | null>(null);
   const [status, setStatus] = useState("loading");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const displayMsRef = useRef(0);
@@ -56,7 +57,7 @@ export default function InstrumentClient() {
 
   useEffect(() => {
     const node = trackButtonRefs.current[selectedTrackId];
-    node?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    node?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
   }, [selectedTrackId, bankTracks.length]);
 
   const primeLocalAudioPlayback = useCallback((track: SongBankTrack, shouldPlay: boolean, startMs: number) => {
@@ -87,6 +88,7 @@ export default function InstrumentClient() {
 
   const loadTrack = useCallback(async (track: SongBankTrack, shouldPlay = true, startMs = 0) => {
     setIsLoading(true);
+    setAnalysisJob(null);
     setSelectedTrackId(track.spotifyTrackId);
     setDisplayMs(startMs);
     lastTickRef.current = null;
@@ -102,7 +104,10 @@ export default function InstrumentClient() {
     setStatus("loading analysis");
     primeLocalAudioPlayback(track, shouldPlay, startMs);
 
-    const next = await fetchTrackAnalysis(track);
+    const next = await fetchTrackAnalysis(track, (job) => {
+      setAnalysisJob(job);
+      setStatus(statusForAnalysisJob(job));
+    });
 
     if (!next.analysis) {
       setStatus("analysis unavailable");
@@ -112,6 +117,7 @@ export default function InstrumentClient() {
     }
 
     setAnalysis(next.analysis);
+    setAnalysisJob(next.job || null);
     setIsPlaying(shouldPlay);
     setStatus(
       shouldPlay
@@ -169,10 +175,16 @@ export default function InstrumentClient() {
         return;
       }
 
-      const next = await fetchTrackAnalysis(initial.track);
+      const next = await fetchTrackAnalysis(initial.track, (job) => {
+        if (!cancelled) {
+          setAnalysisJob(job);
+          setStatus(statusForAnalysisJob(job));
+        }
+      });
       if (cancelled) return;
       if (next.analysis) {
         setAnalysis(next.analysis);
+        setAnalysisJob(next.job || null);
         setIsPlaying(initial.autoplay);
         setStatus(initial.autoplay ? statusForPlayback(initial.track, true) : "ready");
       } else {
@@ -446,7 +458,7 @@ export default function InstrumentClient() {
 
           {analysis ? (
             <>
-              {inspectMode ? <InspectStrip state={activeInspect} /> : null}
+              {inspectMode ? <InspectStrip job={analysisJob} state={activeInspect} /> : null}
               <KaraokeRhymePlayer analysis={analysis} currentMs={displayMs} inspectorVisible={inspectMode} />
             </>
           ) : (
@@ -521,16 +533,17 @@ export default function InstrumentClient() {
   );
 }
 
-function InspectStrip({ state }: { state: InspectState | null }) {
+function InspectStrip({ job, state }: { job: AnalysisJobSummary | null; state: InspectState | null }) {
   return (
     <div
-      className="mb-2 grid grid-cols-2 gap-2 rounded-[4px] border border-white/10 bg-black px-3 py-2 text-[11px] text-white/58 sm:grid-cols-5"
+      className="mb-2 grid grid-cols-2 gap-2 rounded-[4px] border border-white/10 bg-black px-3 py-2 text-[11px] text-white/58 sm:grid-cols-6"
       data-inspect-panel
     >
       <InspectReadout label="word" value={state?.word.text || "none"} />
       <InspectReadout label="tail" value={state?.word.rhymeTail || "none"} />
       <InspectReadout label="family" value={state?.family?.id || "none"} />
       <InspectReadout label="source" value={state?.word.source || "none"} />
+      <InspectReadout label="job" value={formatJobStatus(job)} />
       <InspectReadout label="confidence" value={state ? `${Math.round(state.confidence * 100)}%` : "none"} />
     </div>
   );
@@ -551,6 +564,16 @@ interface InspectState {
   word: AnalysisWord;
   family: RhymeFamily | null;
   confidence: number;
+}
+
+interface AnalysisJobSummary {
+  id: string;
+  status: "queued" | "processing" | "cached" | "completed" | "failed";
+  attempts: number;
+  updatedAt: string;
+  heartbeatAt?: string;
+  cacheKey?: string;
+  error?: string;
 }
 
 function activeInspectState(
@@ -595,6 +618,12 @@ function familyInspectWeight(family: RhymeFamily) {
   return family.confidence + kindWeight + family.wordIds.length / 160;
 }
 
+function formatJobStatus(job: AnalysisJobSummary | null) {
+  if (!job) return "none";
+  const attempts = job.attempts > 0 ? ` / ${job.attempts}x` : "";
+  return `${job.status}${attempts}`;
+}
+
 function clsxTrackButton(active: boolean, unavailable = false) {
   return [
     "flex min-w-[168px] items-center gap-2.5 rounded-md p-2 transition-colors sm:min-w-0 sm:gap-3 lg:min-w-0",
@@ -612,36 +641,27 @@ function formatClock(ms: number) {
 
 interface AnalysisLoadResult {
   analysis: TrackAnalysis | null;
-  jobStatus?: string;
+  job?: AnalysisJobSummary;
 }
 
-async function fetchTrackAnalysis(track: SongBankTrack): Promise<AnalysisLoadResult> {
+async function fetchTrackAnalysis(
+  track: SongBankTrack,
+  onJobUpdate?: (job: AnalysisJobSummary) => void
+): Promise<AnalysisLoadResult> {
   if (track.unavailableReason) return { analysis: null };
 
-  const jobResponse = await fetch("/api/analyze/jobs", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      track,
-      requestedAdapters: ["fixture"],
-      includeResult: true
-    })
-  }).catch(() => null);
+  const queuedJob = await postAnalysisJob(track, { processNow: false });
+  if (queuedJob) {
+    onJobUpdate?.(queuedJob);
+  }
 
-  if (jobResponse?.ok) {
-    const payload = (await jobResponse.json().catch(() => null)) as
-      | {
-          job?: {
-            status?: string;
-            result?: TrackAnalysis;
-          };
-        }
-      | null;
-
-    if (payload?.job?.result) {
+  const processedJob = await postAnalysisJob(track, { includeResult: true });
+  if (processedJob) {
+    onJobUpdate?.(processedJob);
+    if (processedJob.result) {
       return {
-        analysis: payload.job.result,
-        jobStatus: payload.job.status
+        analysis: processedJob.result,
+        job: stripJobResult(processedJob)
       };
     }
   }
@@ -653,7 +673,57 @@ async function fetchTrackAnalysis(track: SongBankTrack): Promise<AnalysisLoadRes
   });
 
   if (!response.ok) return { analysis: null };
-  return { analysis: (await response.json()) as TrackAnalysis };
+  return {
+    analysis: (await response.json()) as TrackAnalysis,
+    job: processedJob ? stripJobResult(processedJob) : undefined
+  };
+}
+
+async function postAnalysisJob(
+  track: SongBankTrack,
+  options: {
+    includeResult?: boolean;
+    processNow?: boolean;
+  }
+): Promise<(AnalysisJobSummary & { result?: TrackAnalysis }) | null> {
+  const response = await fetch("/api/analyze/jobs", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      track,
+      requestedAdapters: ["fixture"],
+      includeResult: options.includeResult,
+      processNow: options.processNow
+    })
+  }).catch(() => null);
+
+  if (!response?.ok) return null;
+  const payload = (await response.json().catch(() => null)) as
+    | {
+        job?: AnalysisJobSummary & { result?: TrackAnalysis };
+      }
+    | null;
+
+  return payload?.job || null;
+}
+
+function stripJobResult(job: AnalysisJobSummary & { result?: TrackAnalysis }): AnalysisJobSummary {
+  return {
+    id: job.id,
+    status: job.status,
+    attempts: job.attempts,
+    updatedAt: job.updatedAt,
+    heartbeatAt: job.heartbeatAt,
+    cacheKey: job.cacheKey,
+    error: job.error
+  };
+}
+
+function statusForAnalysisJob(job: AnalysisJobSummary) {
+  if (job.status === "cached") return "analysis cache hit";
+  if (job.status === "completed") return "analysis complete";
+  if (job.status === "failed") return "analysis failed";
+  return `analysis ${job.status}`;
 }
 
 function statusForPlayback(track: SongBankTrack, canUseAudio: boolean) {

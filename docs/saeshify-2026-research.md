@@ -24,7 +24,7 @@ computes phonetic rhyme families, and renders a color-coded rhyme sheet in real
 time as the track moves.
 ```
 
-the demo should use a private real-song screen recording. the public github repo
+the demo should use a private real-song screen recording. the source repo
 should still ship fixture-safe data and local setup paths only.
 
 ## current technical anchors

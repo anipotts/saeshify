@@ -3,19 +3,23 @@ import { Github } from "lucide-react";
 
 const steps = [
   {
-    label: "clock",
-    text: "spotify now-playing snapshots, active-tab cadence, backoff, local interpolation."
+    label: "spotify poll",
+    text: "now-playing snapshots, 204/401/429 backoff, active tab cadence."
   },
   {
-    label: "sources",
-    text: "fixture lrc, private local lrc, future alignment workers."
+    label: "clock reconcile",
+    text: "server samples, browser interpolation, seek and pause correction."
   },
   {
-    label: "scorer",
-    text: "timestamp density, word coverage, duration fit, source priority."
+    label: "adapters",
+    text: "fixture lrc, private local lrc, local alignment worker later."
   },
   {
-    label: "renderer",
+    label: "scorer cache",
+    text: "word coverage, timestamp density, source priority, best stream wins."
+  },
+  {
+    label: "rhyme renderer",
     text: "bar-level rhyme families, word-level karaoke timing, ghost future text."
   }
 ];
@@ -56,8 +60,7 @@ export default function SystemPage() {
               timed words out.
             </h1>
             <p className="mt-6 max-w-2xl text-sm leading-6 text-white/50 sm:text-base sm:leading-7">
-              saeshify treats playback as the source of truth, reconciles drift, chooses the best timed-word stream,
-              and keeps the rhyme layer locked to the bar.
+              playback clocks in. timed words through. rhyme layer out.
             </p>
 
             <div className="mt-10 divide-y divide-white/12 border-y border-white/12">

@@ -18,12 +18,11 @@ read first:
 - docs/cloudflare-cutover.md
 
 product framing:
-- saeshify is its own instrument, not a case study, explainer page, or
-  commercial music app.
+- saeshify is its own instrument.
 - backend/io is the system underneath. the public surface stays quiet.
 - music-tech taste comes through the Spited-style rhyme sheet.
 - public copy one-liner: live rhyme instrumentation for spotify playback clocks.
-- public github must stay fixture-safe.
+- source repo must stay fixture-safe.
 - private local demo should use Madvillainy as the foundation.
 
 you have permission to work for a long time and iterate. do not stop just

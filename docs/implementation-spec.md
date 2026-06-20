@@ -6,10 +6,9 @@ version: 2026-06-19
 
 turn saeshify into a polished realtime rhyme instrument with a backend/io core.
 
-the end state is not a generic ai music app. it is a working system that makes a
-playback clock visible: spotify-style input state, queued or cached analysis,
-phonetic rhyme families, and a Spited-style renderer that stays synchronized with
-the track.
+the end state is a working instrument that makes a playback clock visible:
+spotify-style input state, queued or cached analysis, phonetic rhyme families,
+and a Spited-style renderer that stays synchronized with the track.
 
 ## north star
 
@@ -22,7 +21,7 @@ and the lyric surface stays locked to the song.
 
 ## public scope
 
-public github and `saeshify.com` should include:
+the source repo and `saeshify.com` should include:
 
 - cloudflare-ready next.js app.
 - public fixture demo that always works.
@@ -307,6 +306,6 @@ browser checks:
 - repo docs stay honest about source boundaries.
 - private demo can show multiple Madvillainy tracks locally.
 - public fixture demo works without secrets.
-- landing page feels like saeshify, not a case study.
+- landing page feels like saeshify itself.
 - tests and cloudflare checks pass.
 - desktop and mobile screenshots look like a finished product, not a prototype.

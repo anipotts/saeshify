@@ -32,8 +32,8 @@ export default function HomePage() {
               live rhyme instrumentation for spotify playback clocks.
             </p>
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/46 sm:text-base sm:leading-7">
-              watches playback state, reconciles the clock, races timing sources, then renders a Spited-style rhyme
-              layer in sync.
+              watches playback state, reconciles the clock, races lyric and alignment adapters, scores the best word
+              stream, then renders a Spited-style rhyme layer in sync.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
