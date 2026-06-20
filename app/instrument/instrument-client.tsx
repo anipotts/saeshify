@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ListMusic, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
+import { Eye, ListMusic, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 import KaraokeRhymePlayer from "@/components/karaoke-rhyme-player";
 import { fixtureTracks } from "@/lib/analysis/fixtures";
-import type { TrackAnalysis } from "@/lib/analysis/types";
+import type { AnalysisWord, RhymeFamily, TrackAnalysis } from "@/lib/analysis/types";
 import { nextSpotifyPollDelay } from "@/lib/playback/clock";
 import { findSpotifyBankTrack, reconcileSpotifySnapshot } from "@/lib/playback/spotify-sync";
 import type { SpotifyNowPlayingResult } from "@/lib/spotify/types";
@@ -30,6 +30,7 @@ export default function InstrumentClient() {
   const [audioBlockedTrackIds, setAudioBlockedTrackIds] = useState<Set<string>>(() => new Set());
   const [audioFailedTrackIds, setAudioFailedTrackIds] = useState<Set<string>>(() => new Set());
   const [spotifySyncEnabled, setSpotifySyncEnabled] = useState(false);
+  const [inspectMode, setInspectMode] = useState(false);
   const [status, setStatus] = useState("loading");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const displayMsRef = useRef(0);
@@ -316,6 +317,14 @@ export default function InstrumentClient() {
 
   const durationMs = analysis?.track.durationMs || analysis?.metrics.durationMs || selectedTrack.durationMs || 1;
   const progress = Math.min(displayMs / durationMs, 1);
+  const inspectFamilyById = useMemo(
+    () => new Map((analysis?.rhymeFamilies || []).map((family) => [family.id, family])),
+    [analysis?.rhymeFamilies]
+  );
+  const activeInspect = useMemo(() => {
+    if (!analysis) return null;
+    return activeInspectState(analysis.words, inspectFamilyById, displayMs);
+  }, [analysis, displayMs, inspectFamilyById]);
 
   const togglePlayback = () => {
     if (!analysis) return;
@@ -396,9 +405,24 @@ export default function InstrumentClient() {
               </h1>
               <p className="mt-2 text-sm text-white/55">{selectedTrack.album || selectedTrack.bankLabel || selectedTrack.artist}</p>
             </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2 text-xs text-white/64">
-              <Volume2 size={15} />
-              {audioBadgeLabel(selectedTrack, canUseLocalAudio, spotifySyncEnabled, audioBlockedTrackIds, audioFailedTrackIds)}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setInspectMode((value) => !value)}
+                className={[
+                  "flex h-9 w-9 items-center justify-center rounded-full transition-colors",
+                  inspectMode ? "bg-white text-black" : "bg-white/8 text-white/60 hover:text-white"
+                ].join(" ")}
+                aria-pressed={inspectMode}
+                aria-label="inspect rhyme metadata"
+                title="inspect rhyme metadata"
+              >
+                <Eye size={16} />
+              </button>
+              <div className="flex items-center gap-2 rounded-full bg-white/8 px-3 py-2 text-xs text-white/64">
+                <Volume2 size={15} />
+                {audioBadgeLabel(selectedTrack, canUseLocalAudio, spotifySyncEnabled, audioBlockedTrackIds, audioFailedTrackIds)}
+              </div>
             </div>
           </div>
 
@@ -421,7 +445,10 @@ export default function InstrumentClient() {
           />
 
           {analysis ? (
-            <KaraokeRhymePlayer analysis={analysis} currentMs={displayMs} />
+            <>
+              {inspectMode ? <InspectStrip state={activeInspect} /> : null}
+              <KaraokeRhymePlayer analysis={analysis} currentMs={displayMs} inspectorVisible={inspectMode} />
+            </>
           ) : (
             <div className="flex min-h-[560px] items-center justify-center rounded border border-white/10 bg-[#d9d9d9] text-sm text-black/55">
               <div className="px-6 text-center">
@@ -492,6 +519,80 @@ export default function InstrumentClient() {
       </footer>
     </main>
   );
+}
+
+function InspectStrip({ state }: { state: InspectState | null }) {
+  return (
+    <div
+      className="mb-2 grid grid-cols-2 gap-2 rounded-[4px] border border-white/10 bg-black px-3 py-2 text-[11px] text-white/58 sm:grid-cols-5"
+      data-inspect-panel
+    >
+      <InspectReadout label="word" value={state?.word.text || "none"} />
+      <InspectReadout label="tail" value={state?.word.rhymeTail || "none"} />
+      <InspectReadout label="family" value={state?.family?.id || "none"} />
+      <InspectReadout label="source" value={state?.word.source || "none"} />
+      <InspectReadout label="confidence" value={state ? `${Math.round(state.confidence * 100)}%` : "none"} />
+    </div>
+  );
+}
+
+function InspectReadout({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <div className="mono uppercase text-white/34">{label}</div>
+      <div className="mt-0.5 truncate font-semibold text-white/82" title={value}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+interface InspectState {
+  word: AnalysisWord;
+  family: RhymeFamily | null;
+  confidence: number;
+}
+
+function activeInspectState(
+  words: AnalysisWord[],
+  familyById: Map<string, RhymeFamily>,
+  currentMs: number
+): InspectState | null {
+  const word = activeWordForClock(words, currentMs);
+  if (!word) return null;
+
+  const family = bestInspectFamily(word, familyById);
+
+  return {
+    word,
+    family,
+    confidence: family?.confidence || word.confidence
+  };
+}
+
+function activeWordForClock(words: AnalysisWord[], currentMs: number) {
+  const activeWord = words.find((word) => currentMs >= word.startMs && currentMs <= word.endMs);
+  if (activeWord) return activeWord;
+
+  for (let index = words.length - 1; index >= 0; index -= 1) {
+    if (currentMs >= words[index].endMs) return words[index];
+  }
+
+  return words[0] || null;
+}
+
+function bestInspectFamily(word: AnalysisWord, familyById: Map<string, RhymeFamily>) {
+  return (
+    word.rhymeFamilyIds
+      .map((id) => familyById.get(id))
+      .filter((family): family is RhymeFamily => Boolean(family))
+      .sort((left, right) => familyInspectWeight(right) - familyInspectWeight(left))[0] || null
+  );
+}
+
+function familyInspectWeight(family: RhymeFamily) {
+  const kindWeight = family.kind === "multi" ? 0.3 : family.kind === "end" ? 0.22 : family.kind === "internal" ? 0.14 : 0;
+  return family.confidence + kindWeight + family.wordIds.length / 160;
 }
 
 function clsxTrackButton(active: boolean, unavailable = false) {

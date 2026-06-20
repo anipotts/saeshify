@@ -14,11 +14,13 @@ import {
 export default function KaraokeRhymePlayer({
   analysis,
   currentMs,
-  compact = false
+  compact = false,
+  inspectorVisible = false
 }: {
   analysis: TrackAnalysis;
   currentMs: number;
   compact?: boolean;
+  inspectorVisible?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const lineRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -66,7 +68,11 @@ export default function KaraokeRhymePlayer({
         ref={scrollRef}
         className={clsx(
           "karaoke-scroll overflow-x-hidden overflow-y-auto scroll-smooth px-4 py-4 sm:px-7 sm:py-6",
-          compact ? "h-[590px]" : "h-[clamp(292px,calc(100dvh-495px),390px)] sm:h-[clamp(430px,calc(100vh-326px),640px)]"
+          compact
+            ? "h-[590px]"
+            : inspectorVisible
+              ? "h-[clamp(180px,calc(100dvh-640px),270px)] sm:h-[clamp(360px,calc(100vh-390px),560px)]"
+              : "h-[clamp(292px,calc(100dvh-495px),390px)] sm:h-[clamp(430px,calc(100vh-326px),640px)]"
         )}
       >
         <div className="pb-[42vh]">
