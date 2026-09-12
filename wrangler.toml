@@ -2,7 +2,7 @@ name = "saeshify"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 account_id = "0f856093bdcd34a7da1bde5ee4385163"
-main = ".open-next/worker.js"
+main = "worker.ts"
 workers_dev = true
 
 [assets]
@@ -12,28 +12,7 @@ binding = "ASSETS"
 [observability]
 enabled = true
 
-# Cron triggers replace Vercel Cron. The current schedule needs to
-# move from Vercel dashboard / vercel.json into [triggers].crons here.
-# A small wrapper handler in the Worker entry will receive the
-# scheduled event and fetch() the corresponding /api/cron/* route
-# with the CRON_SECRET Bearer header.
-#
-# Set the Bearer secret with: wrangler secret put CRON_SECRET
-#
-# [triggers]
-# crons = [
-#   "0 */6 * * *",   # spotify-sync: every 6 hours (verify cadence)
-#   "0 9 * * *",     # notify: daily at 09:00 UTC (verify time + tz)
-# ]
-
-# Custom-domain bind. Uncomment after the saeshify.com zone is added.
-#
-# [[routes]]
-# pattern = "saeshify.com"
-# custom_domain = true
-# zone_id = "<set after zone is created>"
-#
-# [[routes]]
-# pattern = "www.saeshify.com"
-# custom_domain = true
-# zone_id = "<set after zone is created>"
+# Activate only after verifying existing cadence and approving scheduler cutover.
+# Set CRON_ROUTES to a JSON object mapping each approved expression to an array
+# containing /api/cron/notify and/or /api/cron/spotify-sync, then configure the
+# same expressions in [triggers].crons. Missing configuration fails closed.
