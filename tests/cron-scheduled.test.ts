@@ -25,4 +25,12 @@ describe("scheduled dispatch", () => {
     await expect(dispatchScheduled(cron, env, async () => new Response("", { status: 500 }))).rejects.toThrow("500");
     await expect(dispatchScheduled(cron, env, async () => Response.json({ results: [{ status: "failed" }] }))).rejects.toThrow("reported failures");
   });
+  it("dispatches later routes even when an earlier route fails", async () => {
+    const dispatch = vi.fn(async (request: Request) => new URL(request.url).pathname.endsWith("notify")
+      ? new Response("", { status: 500 }) : Response.json({ success: true }));
+    await expect(dispatchScheduled(cron, { ...env, CRON_ROUTES: JSON.stringify({ [cron]: ["/api/cron/notify", "/api/cron/spotify-sync"] }) }, dispatch)).rejects.toThrow("500");
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(new URL(dispatch.mock.calls[1][0].url).pathname).toBe("/api/cron/spotify-sync");
+  });
+
 });

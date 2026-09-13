@@ -11,12 +11,18 @@ export async function dispatchScheduled(cron: string, env: CronEnv, dispatch: Di
   if (!Array.isArray(selected) || selected.length === 0) throw new Error("Cron has no configured routes");
   const allowed = new Set(["/api/cron/notify", "/api/cron/spotify-sync"]);
   if (selected.some(route => typeof route !== "string" || !allowed.has(route))) throw new Error("Invalid cron route");
+  const failures: unknown[] = [];
   for (const route of [...new Set(selected as string[])]) {
+    try {
     const response = await dispatch(new Request(`https://scheduled.internal${route}`, {
       headers: { authorization: `Bearer ${env.CRON_SECRET}` },
     }));
     if (!response.ok) throw new Error(`Cron route ${route} failed: ${response.status}`);
     const result = await response.json() as { results?: Array<{ status?: string; error?: unknown }> };
     if (result.results?.some(item => item.status === "failed" || item.error)) throw new Error(`Cron route ${route} reported failures`);
+    } catch (error) {
+      failures.push(error);
+    }
   }
+  if (failures.length) throw new Error(failures.map(error => error instanceof Error ? error.message : "Cron dispatch failed").join("; "));
 }
