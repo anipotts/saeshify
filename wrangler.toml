@@ -1,6 +1,6 @@
 name = "saeshify"
 compatibility_date = "2025-04-01"
-compatibility_flags = ["nodejs_compat"]
+compatibility_flags = ["nodejs_compat", "enable_nodejs_http_modules"]
 account_id = "0f856093bdcd34a7da1bde5ee4385163"
 main = "worker.ts"
 workers_dev = true

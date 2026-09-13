@@ -20,6 +20,7 @@ jobs:
           node-version: '22'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: node scripts/check-worker-compat.mjs
       - run: pnpm test
       - run: pnpm exec tsc --noEmit
       - run: pnpm cf:build

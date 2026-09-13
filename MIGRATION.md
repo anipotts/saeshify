@@ -11,7 +11,9 @@ Real public build values are required for production. Never deploy the CI fixtur
 
 On 2026-09-12: 61 tests, TypeScript, OpenNext build and Wrangler dry-run passed.
 Local workerd: homepage 200, both unauthenticated cron routes 401, including
-Bearer undefined. Authenticated Spotify and push delivery remain unverified.
+Bearer undefined. Spotify token fetch and encrypted VAPID-signed web-push requests pass in workerd
+against intercepted fixture endpoints (`node scripts/check-worker-compat.mjs`).
+Real authenticated Spotify and push delivery remain unverified.
 The bundle is about 4 MiB compressed; verify the intended account supports it.
 Repository-wide lint reports pre-existing debt and is not a passing gate.
 
@@ -33,9 +35,9 @@ applicable scheduler approval. DNS, account and secret changes are separate.
 The existing https://saeshify.vercel.app returned 200 from Vercel on 2026-09-12.
 No Cloudflare deployment, DNS change, secret change or scheduler cutover was made.
 GitHub main ruleset 21578171 requires PRs and protects deletion and history, with
-no bypass, but lacks required status checks. Before merging, separately authorize
-and configure strict required CI / verify protection, then re-read the exact head
-and provider checks. Merely adding the workflow does not establish protection.
+no bypass. On 2026-09-13 the approved ruleset update added strict required
+GitHub Actions verify checks (integration 15368). Re-read protection and the
+exact head checks immediately before merge.
 
 ## Dependency consolidation
 
@@ -45,5 +47,17 @@ nanoid 3.3.19; fast-uri 3.1.7; brace-expansion 1.1.18/2.1.4/5.0.9;
 js-yaml 4.3.2; postcss-selector-parser 6.1.4; @humanfs/node 0.16.8;
 browserslist 4.28.9; qs 6.16.0; vitest and @vitest/mocker 4.1.11;
 baseline-browser-mapping 2.11.23; sharp 0.35.4; Next and eslint-config-next 16.3.4.
-The old proposals can be closed as consolidated into PR #2, retaining branches.
+The old proposals are closed as consolidated into PR #2, with all 11 branches retained.
 They are not incorporated into main until PR #2 merges.
+
+## Runtime compatibility
+
+The configured compatibility date needs enable_nodejs_http_modules for native
+HTTPS requests used by web-push. The fixture uses the actual wrangler.toml flags,
+intercepts every outbound request, and checks Spotify form encoding plus push
+POST, VAPID authorization and encrypted body. No real notifications are sent.
+See https://developers.cloudflare.com/workers/runtime-apis/nodejs/https/.
+
+Vercel created historical production deployments. A main merge may trigger its
+existing integration; no new deployment workflow or webhook was added. Cloudflare
+production cutover, credentials, cron cadence and real integration QA remain separate.
