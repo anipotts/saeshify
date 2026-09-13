@@ -1,0 +1,18 @@
+name = "saeshify"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat", "enable_nodejs_http_modules"]
+account_id = "0f856093bdcd34a7da1bde5ee4385163"
+main = "worker.ts"
+workers_dev = true
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[observability]
+enabled = true
+
+# Activate only after verifying existing cadence and approving scheduler cutover.
+# Set CRON_ROUTES to a JSON object mapping each approved expression to an array
+# containing /api/cron/notify and/or /api/cron/spotify-sync, then configure the
+# same expressions in [triggers].crons. Missing configuration fails closed.
