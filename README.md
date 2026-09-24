@@ -12,8 +12,8 @@ live at [saeshify.vercel.app](https://saeshify.vercel.app).
 - **vault**: save tracks and albums you actually care about. that's the pool you rank from
 - **compare**: head-to-head matchups for tracks or albums. matchmaking skips pairs you've already seen
 - **rankings**: your vault sorted by elo, per track and per album
-- **library** and **settings**: profile, preferences, and a data page to export or reset what you've ranked
-- **nudges** (optional): a cron job reads your recent listening and sends a web push when you keep replaying something that isn't in your vault yet, or binge one artist
+- **library** and **settings**: profile, preferences, and a data page to reset or delete what you've ranked
+- **nudges** (optional): a cron job reads your recent listening and sends a web push when you keep replaying one track (suggesting you vault it) or binge one artist
 - **rhymes** (experimental): overlays rhyme families on the lyrics of whatever's playing. needs the separate rhyme service in `scripts/`, which runs on a gpu box and isn't part of the deploy
 
 ## stack
