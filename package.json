@@ -53,5 +53,13 @@
     "@opennextjs/cloudflare": "^1.19.9",
     "wrangler": "^4.90.0"
   },
-  "packageManager": "pnpm@10.26.1"
+  "packageManager": "pnpm@10.26.1",
+  "pnpm": {
+    "overrides": {
+      "fast-uri@3": "^3.1.9",
+      "undici@7": "^7.30.1",
+      "qs@6": "^6.17.1",
+      "postcss-selector-parser@6": "^6.1.6"
+    }
+  }
 }
