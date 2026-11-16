@@ -17,20 +17,20 @@
     "cf:deploy": "pnpm run cf:build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.87.1",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
     "@types/canvas-confetti": "^1.9.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.561.0",
-    "next": "16.4.1",
+    "next": "16.4.6",
     "next-pwa": "^5.6.0",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "spotify-web-api-node": "^5.0.2",
-    "tailwind-merge": "^3.4.0",
-    "zustand": "^5.0.9"
+    "tailwind-merge": "^3.7.0",
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -40,18 +40,18 @@
     "@types/react-dom": "^19",
     "@types/spotify-web-api-node": "^5.0.11",
     "@types/web-push": "^3.6.4",
-    "@vitejs/plugin-react": "^6.0.1",
-    "autoprefixer": "^10.4.19",
+    "@vitejs/plugin-react": "^6.3.0",
+    "autoprefixer": "^10.6.2",
     "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.4.6",
     "jsdom": "^29.0.0",
-    "postcss": "^8.4.31",
+    "postcss": "^8.5.32",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
     "vitest": "^4.1.0",
     "web-push": "^3.6.7",
-    "@opennextjs/cloudflare": "^1.19.9",
-    "wrangler": "^4.90.0"
+    "@opennextjs/cloudflare": "^1.20.17",
+    "wrangler": "^4.161.0"
   },
   "packageManager": "pnpm@10.26.1",
   "pnpm": {
