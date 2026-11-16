@@ -35,7 +35,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@types/node": "^20.19.27",
+    "@types/node": "^26.6.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/spotify-web-api-node": "^5.0.11",
